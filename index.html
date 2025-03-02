@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lawless | Blue Dragon</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    :root {
+      --primary: #0a84ff;
+      --secondary: #003366;
+      --accent: #00ffff;
+      --purple: #9d00ff;
+      --dark: #050a1c;
+      --light: #ffffff;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: var(--dark);
+      color: var(--light);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    
+    .custom-cursor {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: transparent;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 15px var(--accent);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      transition: width 0.3s, height 0.3s, background 0.3s;
+    }
+    
+    .custom-cursor.active {
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 255, 255, 0.1);
+    }
+    
+    .custom-cursor::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 5px;
+      height: 5px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+    
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    
+    main {
+      position: relative;
+    }
+    
+    section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    /* Landing Page */
+    .landing {
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    
+    .landing h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 5rem;
+      margin-bottom: 2rem;
+      color: var(--primary);
+      text-shadow: 0 0 20px var(--accent);
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    
+    .landing p {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .typing-container {
+      height: 2rem;
+      margin-bottom: 3rem;
+      opacity: 0;
+    }
+    
+    .enter-btn {
+      padding: 12px 35px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+      border-radius: 30px;
+      cursor: pointer;
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .enter-btn:hover {
+      background: rgba(0, 255, 255, 0.2);
+      box-shadow: 0 0 20px var(--accent);
+      transform: translateY(-3px);
+    }
+    
+    .enter-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5), transparent);
+      transform: translateX(-100%);
+    }
+    
+    .enter-btn:hover::before {
+      animation: glitch-effect 1.5s infinite;
+    }
+    
+    /* About Page */
+    .about {
+      padding: 5rem 0;
+      opacity: 0;
+      display: none;
+    }
+    
+    .about-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      padding: 0 2rem;
+    }
+    
+    .avatar-container {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(0, 132, 255, 0.5);
+    }
+    
+    .avatar {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1);
+      transition: transform 0.5s;
+    }
+    
+    .avatar-container:hover .avatar {
+      transform: scale(1.05);
+    }
+    
+    .avatar-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 2rem;
+      background: linear-gradient(to top, rgba(0, 51, 102, 0.9), transparent);
+      transform: translateY(100%);
+      transition: transform 0.5s;
+    }
+    
+    .avatar-container:hover .avatar-overlay {
+      transform: translateY(0);
+    }
+    
+    .about-content h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
+    }
+    
+    .chat-container {
+      max-width: 100%;
+      margin-bottom: 3rem;
+    }
+    
+    .chat-bubble {
+      background: linear-gradient(135deg, var(--secondary), rgba(0, 51, 102, 0.5));
+      padding: 1.5rem;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+      position: relative;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .chat-bubble::before {
+      content: '';
+      position: absolute;
+      left: -15px;
+      top: 20px;
+      border-width: 15px 15px 15px 0;
+      border-style: solid;
+      border-color: transparent var(--secondary) transparent transparent;
+    }
+    
+    .fun-facts {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    
+    .fact-card {
+      height: 200px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+    
+    .fact-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+    }
+    
+    .fact-card:hover .fact-card-inner {
+      transform: rotateY(180deg);
+    }
+    
+    .fact-front, .fact-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    
+    .fact-front {
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .fact-back {
+      background: linear-gradient(135deg, var(--purple), var(--accent));
+      color: white;
+      transform: rotateY(180deg);
+      font-size: 1rem;
+    }
+    
+    /* Timeline */
+    .timeline {
+      position: relative;
+      max-width: 100%;
+      margin: 3rem 0;
+    }
+    
+    .timeline::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      background: var(--primary);
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      margin-left: -3px;
+      box-shadow: 0 0 15px var(--accent);
+    }
+    
+    .timeline-item {
+      padding: 10px 40px;
+      position: relative;
+      width: 50%;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background: var(--accent);
+      border-radius: 50%;
+      top: 15px;
+      border: 4px solid var(--primary);
+      box-shadow: 0 0 10px var(--accent);
+    }
+    
+    .timeline-left {
+      left: 0;
+      text-align: right;
+    }
+    
+    .timeline-right {
+      left: 50%;
+      text-align: left;
+    }
+    
+    .timeline-left::after {
+      right: -13px;
+    }
+    
+    .timeline-right::after {
+      left: -13px;
+    }
+    
+    .timeline-content {
+      padding: 20px;
+      background: rgba(0, 51, 102, 0.7);
+      border-radius: 15px;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .timeline-date {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--accent);
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    /* Gallery */
+    .gallery {
+      padding: 5rem 2rem;
+      opacity: 0;
+      display: none;
+    }
+    
+    .gallery h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
+    }
+    
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      aspect-ratio: 1;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+    
+    .gallery-item:hover .gallery-img {
+      transform: scale(1.1);
+    }
+    
+    .gallery-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 51, 102, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 2rem;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    
+    .gallery-item:hover .gallery-overlay {
+      opacity: 1;
+    }
+    
+    .gallery-overlay h3 {
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+    
+    /* Lore Page */
+    .lore {
+      padding: 5rem 2rem;
+      opacity: 0;
+      display: none;
+    }
+    
+    .lore-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .lore h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
+    }
+    
+    .lore-map {
+      width: 100%;
+      height: 500px;
+      background: linear-gradient(135deg, var(--secondary), rgba(10, 20, 30, 0.7));
+      border-radius: 15px;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .map-region {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(0, 132, 255, 0.2);
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 20px var(--accent);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .map-region:hover {
+      background: rgba(0, 132, 255, 0.4);
+      transform: scale(1.1);
+    }
+    
+    .region-1 {
+      width: 100px;
+      height: 100px;
+      top: 30%;
+      left: 20%;
+    }
+    
+    .region-2 {
+      width: 120px;
+      height: 120px;
+      top: 50%;
+      left: 60%;
+    }
+    
+    .region-3 {
+      width: 80px;
+      height: 80px;
+      top: 70%;
+      left: 40%;
+    }
+    
+    .lore-story {
+      background: rgba(10, 20, 30, 0.7);
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .lore-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+    }
+    
+    .cinematic-text {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      position: relative;
+      opacity: 0;
+    }
+    
+    /* Contact Page */
+    .contact {
+      padding: 5rem 2rem;
+      opacity: 0;
+      display: none;
+    }
+    
+    .contact-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .contact h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
+    }
+    
+    .contact-form {
+      background: rgba(10, 20, 30, 0.7);
+      border-radius: 15px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .form-group {
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(0, 20, 40, 0.6);
+      border: none;
+      border-bottom: 2px solid var(--primary);
+      color: white;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-bottom-color: var(--accent);
+      box-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
+    }
+    
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .form-label {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      transition: all 0.3s;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .form-input:focus + .form-label,
+    .form-input:not(:placeholder-shown) + .form-label {
+      transform: translateY(-20px);
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+    
+    textarea.form-input {
+      min-height: 150px;
+      resize: vertical;
+    }
+    
+    .submit-btn {
+      padding: 1rem 2rem;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(0, 132, 255, 0.3);
+    }
+    
+    .submit-btn:hover {
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 132, 255, 0.5);
+    }
+    
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    
+    .social-link {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .social-link:hover {
+      transform: translateY(-5px) scale(1.1);
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      box-shadow: 0 10px 20px rgba(0, 132, 255, 0.5), 0 0 30px var(--accent);
+    }
+    
+    .social-icon {
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    .qr-container {
+      margin-top: 4rem;
+      text-align: center;
+    }
+    
+    .qr-code {
+      width: 200px;
+      height: 200px;
+      background: white;
+      padding: 1rem;
+      border-radius: 15px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .qr-code img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    
+    /* Navigation */
+    .nav {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 20, 40, 0.7);
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      display: flex;
+      gap: 1.5rem;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+    }
+    
+    .nav-link {
+      color: var(--light);
+      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      transition: all 0.3s;
+    }
+    
+    .nav-link:hover,
+    .nav-link.active {
+      background: rgba(0, 132, 255, 0.3);
+      color: var(--accent);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+    }
+    
+    /* Animations */
+    @keyframes floatingAnimation {
+      0% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-15px);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes glitch-effect {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 15px rgba(0, 255, 255, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
+      }
+    }
+    
+    /* Responsive */
+    @media (max-width: 900px) {
+      .about-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .timeline::after {
+        left: 31px;
+      }
+      
+      .timeline-item {
+        width: 100%;
+        padding-left: 70px;
+        padding-right: 25px;
+      }
+      
+      .timeline-right, .timeline-left {
+        left: 0;
+        text-align: left;
+      }
+      
+      .timeline-left::after, .timeline-right::after {
+        left: 15px;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .landing h1 {
+        font-size: 3rem;
+      }
+      
+      .nav {
+        width: 90%;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      
+      .fun-facts {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="custom-cursor"></div>
+  <canvas id="bgCanvas"></canvas>
+  
+  <main>
+    <section id="landing" class="landing">
+      <h1>LAWLESS</h1>
+      <div class="typing-container">
+        <p id="typing-text"></p>
+      </div>
+      <button class="enter-btn">ENTER</button>
+    </section>
+    
+    <section id="about" class="about">
+      <div class="about-container">
+        <div class="avatar-container">
+          <img src="https://cdn.discordapp.com/attachments/1252960193227128862/1345764516545167360/IMG_20241129_154137.jpg?ex=67c5bc5f&is=67c46adf&hm=86b7722910bb66b1febce0968190c7edcae92f4244fe0221dc9073013942a0fd&" alt="Lawless Blue Dragon" class="avatar">
+          <div class="avatar-overlay">
+            <h3>Lawless</h3>
+            <p>The Mystical Blue Dragon</p>
+          </div>
+        </div>
+        
+        <div class="about-content">
+          <h2>About Me</h2>
+          
+          <div class="chat-container">
+            <div class="chat-bubble">
+              Halo! Aku Lawless, seekor naga biru yang mencintai petualangan di dunia digital. Persona ini merupakan representasi dari imajinasku yang penuh warna dan personalitasku yang energik!
+            </div>
+            
+            <div class="chat-bubble">
+              Setiap skala pada tubuhku menceritakan kisah tersendiri. Perjalananku dimulai ketika aku jatuh cinta pada dunia komunitas furry dan memutuskan untuk menciptakan karakter yang benar-benar mencerminkan jiwaku.
+            </div>
+            
+            <div class="chat-bubble">
+              Yang membuat naga ini spesial? Mungkin aura biruku yang futuristik, atau mungkin sifatku yang selalu ingin menjelajah hal-hal baru. Apa menurutmu?
+            </div>
+          </div>
+          
+          <div class="timeline">
+            <div class="timeline-item timeline-left">
+              <div class="timeline-content">
+                <div class="timeline-date">2020</div>
+                <h3>Awal Mula</h3>
+                <p>Pertama kali menemukan komunitas furry dan terpesona dengan konsep fursuiting.</p>
+              </div>
+            </div>
+            
+            <div class="timeline-item timeline-right">
+              <div class="timeline-content">
+                <div class="timeline-date">2021</div>
+                <h3>Lahirnya Lawless</h3>
+                <p>Menciptakan karakter Lawless sebagai alter ego digital yang mencerminkan personalitas futuristik.</p>
+              </div>
+            </div>
+            
+            <div class="timeline-item timeline-left">
+              <div class="timeline-content">
+                <div class="timeline-date">2022</div>
+                <h3>Eksplorasi Identitas</h3>
+                <p>Mengembangkan lore dan dunia Lawless, membuat koneksi dengan komunitas serupa.</p>
+              </div>
+            </div>
+            
+            <div class="timeline-item timeline-right">
+              <div class="timeline-content">
+                <div class="timeline-date">2023 - Sekarang</div>
+                <h3>Petualangan Berlanjut</h3>
+                <p>Terus mengeksplorasi dunia digital dan membagikan petualangan sebagai Lawless.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="fun-facts">
+            <div class="fact-card">
+              <div class="fact-card-inner">
+                <div class="fact-front">
+                  <p>Makanan Favorit?</p>
+                </div>
+                <div class="fact-back">
+                  <p>Es krim rasa blueberry dengan taburan kristal biru!</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="fact-card">
+              <div class="fact-card-inner">
+                <div class="fact-front">
+                  <p>Kemampuan Spesial?</p>
+                </div>
+                <div class="fact-back">
+                  <p>Manipulasi energi biru dan teleportasi antar dimensi digital!</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="fact-card">
+              <div class="fact-card-inner">
+                <div class="fact-front">
+                  <p>Hobi Tersembunyi?</p>
+                </div>
+                <div class="fact-back">
+                  <p>Mengoleksi kristal biru langka dari berbagai dunia paralel.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="fact-card">
+              <div class="fact-card-inner">
+                <div class="fact-front">
+                  <p>Takut Terhadap?</p>
+                </div>
+                <div class="fact-back">
+                  <p>Ruang gelap tanpa warna dan koneksi internet yang lambat!</p>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</section>
+
+<section id="gallery" class="gallery">
+  <h2>Galeri Lawless</h2>
+  
+  <div class="gallery-grid">
+    <div class="gallery-item">
+      <img src="https://cdn.discordapp.com/attachments/1252960193227128862/1345766983014158449/1740926243424.jpg?ex=67c5beab&is=67c46d2b&hm=7404ca2928ecdfd09fba317e85be0bd899ac4b600abed4eb70b185a726deacd7&" alt="Lawless Adventure" class="gallery-img">
+      <div class="gallery-overlay">
+        <h3>Petualangan di Hutan Kristal</h3>
+        <p>Eksplorasi pertama Lawless menemukan kristal biru legendaris.</p>
+      </div>
+    </div>
+    
+    <div class="gallery-item">
+      <img src="https://cdn.discordapp.com/attachments/1252960193227128862/1345769132284448840/1740926756923.jpg?ex=67c5c0ac&is=67c46f2c&hm=6c879368f95baafbdaddd36f551558ff6e1319d0e3b8b702b8ed0a15e0841664&" alt="Lawless Flying" class="gallery-img">
+      <div class="gallery-overlay">
+        <h3>Terbang Menembus Awan</h3>
+        <p>Momen bebas di langit tanpa batas.</p>
+      </div>
+    </div>
+    
+    <div class="gallery-item">
+      <img src="https://cdn.discordapp.com/attachments/1252960193227128862/1345768811738955887/1740926680018.png?ex=67c5c05f&is=67c46edf&hm=685f9389f06fce7449b61956cd64feaa16aa7a9ba97017912d64604620bfba12&" alt="Lawless Magic" class="gallery-img">
+      <div class="gallery-overlay">
+        <h3>Kekuatan Elemental</h3>
+        <p>Mengendalikan elemen air dan es dengan energi biru.</p>
+      </div>
+    </div>
+    
+    <div class="gallery-item">
+      <img src="https://cdn.discordapp.com/attachments/1252960193227128862/1345769325184815195/1740926802527.png?ex=67c5c0da&is=67c46f5a&hm=fdef420b87496fcff750bfc821abc50651aa5a8c301361ff92c2d519bb121a07&" alt="Lawless Portrait" class="gallery-img">
+      <div class="gallery-overlay">
+        <h3>Potret Royal</h3>
+        <p>Sisi anggun dari sang naga biru.</p>
+      </div>
+    </div>
+    
+    <div class="gallery-item">
+      <img src="https://cdn.discordapp.com/attachments/1252960193227128862/1343101296101818490/LAWLESS_DERG_COMMS2_2_1.jpg?ex=67c5468e&is=67c3f50e&hm=91d8b706b08b8d792cde54bc3f5562d2ae41702698864d3687bba0954191ca1d&" alt="Lawless Friend" class="gallery-img">
+      <div class="gallery-overlay">
+        <h3>Persahabatan Antar Dunia</h3>
+        <p>Bertemu teman-teman dari dimensi lain.</p>
+      </div>
+    </div>
+    
+    <div class="gallery-item">
+      <img src="https://cdn.discordapp.com/attachments/1252960193227128862/1345769491597889647/1740926839855.png?ex=67c5c101&is=67c46f81&hm=a48b0ed0749e396c98f213cccff96835d8351c71dae23c853697e2d2d442e152&" alt="Lawless Night" class="gallery-img">
+      <div class="gallery-overlay">
+        <h3>Malam di Sanctuary</h3>
+        <p>Momen tenang di bawah langit penuh bintang.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="lore" class="lore">
+  <div class="lore-container">
+    <h2>Dunia Lawless</h2>
+    
+    <div class="lore-map">
+      <div class="map-region region-1" data-region="icewing"></div>
+      <div class="map-region region-2" data-region="crystalvalley"></div>
+      <div class="map-region region-3" data-region="azurecity"></div>
+    </div>
+    
+    <div class="lore-story" id="region-icewing">
+      <h3 class="lore-title">The IceWing Sanctuary</h3>
+      <p class="cinematic-text">Di puncak tertinggi dimensi Azura, terdapat sanctuary legendaris yang diselimuti es abadi. Tempat ini adalah rumah bagi para naga es, termasuk leluhur Lawless...</p>
+      <p class="cinematic-text">Energi biru murni mengalir dari pusat sanctuary, memberikan kekuatan elemental dan kemampuan teleportasi kepada para naga yang tinggal di sana.</p>
+    </div>
+    
+    <div class="lore-story" id="region-crystalvalley">
+      <h3 class="lore-title">Crystal Valley</h3>
+      <p class="cinematic-text">Lembah yang dipenuhi kristal biru raksasa, memancarkan cahaya yang menerangi malam abadi...</p>
+      <p class="cinematic-text">Di lembah inilah Lawless pertama kali menemukan koneksi dengan energi murni yang mengalir dalam pembuluhnya, membuka portal ke dunia digital yang tak terbatas.</p>
+    </div>
+    
+    <div class="lore-story" id="region-azurecity">
+      <h3 class="lore-title">Azure Metropolis</h3>
+      <p class="cinematic-text">Kota futuristik yang melayang di antara awan dimensi Azura. Bangunan kristal dan neon biru mendominasi panorama kota...</p>
+      <p class="cinematic-text">Lawless sering mengunjungi tempat ini untuk bertemu dengan sesama makhluk interdimensional, berbagi cerita dan pengalaman dari berbagai dunia.</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <div class="contact-container">
+    <h2>Hubungi Lawless</h2>
+    
+    <div class="contact-form">
+      <div class="form-group">
+        <input type="text" class="form-input" id="name" placeholder=" ">
+        <label for="name" class="form-label">Nama Kamu</label>
+      </div>
+      
+      <div class="form-group">
+        <input type="email" class="form-input" id="email" placeholder=" ">
+        <label for="email" class="form-label">Email</label>
+      </div>
+      
+      <div class="form-group">
+        <textarea class="form-input" id="message" placeholder=" "></textarea>
+        <label for="message" class="form-label">Pesan untuk Lawless</label>
+      </div>
+      
+      <button type="submit" class="submit-btn">KIRIM PESAN</button>
+    </div>
+    
+    <div class="social-links">
+      <a href="#" class="social-link">
+        <i class="social-icon">🌐</i>
+      </a>
+      <a href="#" class="social-link">
+        <i class="social-icon">📷</i>
+      </a>
+      <a href="#" class="social-link">
+        <i class="social-icon">🐦</i>
+      </a>
+      <a href="#" class="social-link">
+        <i class="social-icon">📱</i>
+      </a>
+    </div>
+    
+    <div class="qr-container">
+      <h3>Scan untuk terhubung langsung</h3>
+      <div class="qr-code">
+        <div style="width: 100%; height: 100%; background: repeating-conic-gradient(#000 0%, #000 25%, white 0%, white 50%); background-size: 20px 20px;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<nav class="nav">
+<a href="#landing" class="nav-link active">Home</a>
+<a href="#about" class="nav-link">About</a>
+<a href="#gallery" class="nav-link">Gallery</a>
+<a href="#lore" class="nav-link">Lore</a>
+<a href="#contact" class="nav-link">Contact</a>
+</nav>
+
+<script>
+// Custom cursor
+const cursor = document.querySelector('.custom-cursor');
+
+document.addEventListener('mousemove', (e) => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+
+document.addEventListener('mousedown', () => {
+  cursor.classList.add('active');
+});
+
+document.addEventListener('mouseup', () => {
+  cursor.classList.remove('active');
+});
+
+// Background Canvas with Three.js
+let scene, camera, renderer;
+let particles;
+
+function initThreeJS() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bgCanvas'), alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  
+  // Create particles
+  const particlesGeometry = new THREE.BufferGeometry();
+  const particlesCount = 1000;
+  
+  const posArray = new Float32Array(particlesCount * 3);
+  const scales = new Float32Array(particlesCount);
+  
+  for (let i = 0; i < particlesCount * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 10;
+  }
+  
+  for (let i = 0; i < particlesCount; i++) {
+    scales[i] = Math.random();
+  }
+  
+  particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+  particlesGeometry.setAttribute('scale', new THREE.BufferAttribute(scales, 1));
+  
+  // Material
+  const particlesMaterial = new THREE.PointsMaterial({
+    size: 0.03,
+    color: 0x00ffff,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.AdditiveBlending
+  });
+  
+  // Mesh
+  particles = new THREE.Points(particlesGeometry, particlesMaterial);
+  scene.add(particles);
+  
+  camera.position.z = 3;
+  
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+  
+  animate();
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  
+  particles.rotation.x += 0.0005;
+  particles.rotation.y += 0.0003;
+  
+  renderer.render(scene, camera);
+}
+
+// Text typing effect
+const typingText = document.getElementById('typing-text');
+const textToType = [
+  "Selamat datang di dunia digitalku.",
+  "Aku adalah Lawless, naga biru yang penuh misteri.",
+  "Siap untuk menjelajah?"
+];
+
+let textIndex = 0;
+let charIndex = 0;
+let isDeleting = false;
+let typingDelay = 100;
+
+function typeText() {
+  const currentText = textToType[textIndex];
+  
+  if (!isDeleting && charIndex <= currentText.length) {
+    typingText.textContent = currentText.slice(0, charIndex);
+    charIndex++;
+    setTimeout(typeText, typingDelay);
+  } else if (isDeleting && charIndex >= 0) {
+    typingText.textContent = currentText.slice(0, charIndex);
+    charIndex--;
+    setTimeout(typeText, typingDelay / 2);
+  } else {
+    isDeleting = !isDeleting;
+    
+    if (!isDeleting) {
+      textIndex = (textIndex + 1) % textToType.length;
+    }
+    
+    setTimeout(typeText, isDeleting ? 1000 : 500);
+  }
+}
+
+// Sections navigation
+const sections = ['landing', 'about', 'gallery', 'lore', 'contact'];
+const navLinks = document.querySelectorAll('.nav-link');
+
+navLinks.forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    
+    // Update active link
+    navLinks.forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+    
+    // Get section id
+    const targetId = link.getAttribute('href').slice(1);
+    
+    // Hide all sections
+    sections.forEach(section => {
+      document.getElementById(section).style.display = 'none';
+    });
+    
+    // Show target section
+    const targetSection = document.getElementById(targetId);
+    targetSection.style.display = 'flex';
+    
+    // Animate in
+    gsap.fromTo(
+      targetSection, 
+      { opacity: 0, y: 30 }, 
+      { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }
+    );
+  });
+});
+
+// Enter button click
+const enterButton = document.querySelector('.enter-btn');
+
+enterButton.addEventListener('click', () => {
+  // Hide landing, show about
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('about').style.display = 'flex';
+  
+  // Update active nav link
+  navLinks.forEach(l => l.classList.remove('active'));
+  document.querySelector('a[href="#about"]').classList.add('active');
+  
+  // Animate about section
+  gsap.fromTo(
+    '.about', 
+    { opacity: 0, y: 30 }, 
+    { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }
+  );
+  
+  // Animate chat bubbles
+  gsap.fromTo(
+    '.chat-bubble', 
+    { opacity: 0, y: 20 }, 
+    { opacity: 1, y: 0, duration: 0.6, stagger: 0.3, ease: 'power2.out' }
+  );
+  
+  // Animate timeline items
+  gsap.fromTo(
+    '.timeline-item', 
+    { opacity: 0, y: 20 }, 
+    { opacity: 1, y: 0, duration: 0.6, stagger: 0.2, ease: 'power2.out', delay: 0.5 }
+  );
+});
+
+// Map regions
+const mapRegions = document.querySelectorAll('.map-region');
+const regionStories = document.querySelectorAll('.lore-story');
+
+mapRegions.forEach(region => {
+  region.addEventListener('click', () => {
+    const regionId = region.getAttribute('data-region');
+    
+    // Hide all stories first
+    regionStories.forEach(story => {
+      gsap.to(story, { opacity: 0, y: 20, duration: 0.3 });
+    });
+    
+    // Show the selected region story
+    const targetStory = document.getElementById(`region-${regionId}`);
+    gsap.fromTo(
+      targetStory, 
+      { opacity: 0, y: 20 }, 
+      { opacity: 1, y: 0, duration: 0.6, delay: 0.3 }
+    );
+    
+    // Animate the cinematic text
+    gsap.fromTo(
+      targetStory.querySelectorAll('.cinematic-text'), 
+      { opacity: 0 }, 
+      { opacity: 1, duration: 0.8, stagger: 0.5, delay: 0.5 }
+    );
+  });
+});
+
+// Form input animation
+const formInputs = document.querySelectorAll('.form-input');
+
+formInputs.forEach(input => {
+  input.addEventListener('focus', () => {
+    input.parentElement.classList.add('focused');
+  });
+  
+  input.addEventListener('blur', () => {
+    if (input.value === '') {
+      input.parentElement.classList.remove('focused');
+    }
+  });
+});
+
+// Easter egg - konami code sequence
+const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let konamiIndex = 0;
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === konamiCode[konamiIndex]) {
+    konamiIndex++;
+    
+    if (konamiIndex === konamiCode.length) {
+      activateEasterEgg();
+      konamiIndex = 0;
+    }
+  } else {
+    konamiIndex = 0;
+  }
+});
+
+function activateEasterEgg() {
+  const dragonRoar = document.createElement('div');
+  dragonRoar.style.position = 'fixed';
+  dragonRoar.style.top = '0';
+  dragonRoar.style.left = '0';
+  dragonRoar.style.width = '100%';
+  dragonRoar.style.height = '100%';
+  dragonRoar.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  dragonRoar.style.display = 'flex';
+  dragonRoar.style.alignItems = 'center';
+  dragonRoar.style.justifyContent = 'center';
+  dragonRoar.style.zIndex = '9999';
+  dragonRoar.style.fontFamily = 'Orbitron, sans-serif';
+  dragonRoar.style.fontSize = '3rem';
+  dragonRoar.style.color = 'var(--accent)';
+  dragonRoar.style.textShadow = '0 0 20px var(--accent)';
+  dragonRoar.innerHTML = 'ROAAAARRR!!! 🐉✨';
+  document.body.appendChild(dragonRoar);
+  
+  setTimeout(() => {
+    document.body.removeChild(dragonRoar);
+  }, 3000);
+}
+
+// Secret command
+let typedCommand = '';
+
+document.addEventListener('keypress', (e) => {
+  typedCommand += e.key.toLowerCase();
+  
+  if (typedCommand.includes('roar')) {
+    activateEasterEgg();
+    typedCommand = '';
+  }
+  
+  // Reset after 2 seconds of no typing
+  setTimeout(() => {
+    typedCommand = '';
+  }, 2000);
+});
+
+// Init
+window.addEventListener('load', () => {
+  // Initialize Three.js background
+  initThreeJS();
+  
+  // Show navigation
+  gsap.to('.nav', { opacity: 1, y: 0, duration: 1, delay: 0.5 });
+  
+  // Animate landing page elements
+  gsap.fromTo('.landing h1', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1 });
+  gsap.fromTo('.typing-container', { opacity: 0 }, { opacity: 1, duration: 1, delay: 0.5 });
+  gsap.fromTo('.enter-btn', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, delay: 1.5 });
+  
+  // Start typing animation
+  setTimeout(typeText, 1000);
+  
+  // Preload gallery images
+  const galleryItems = document.querySelectorAll('.gallery-item');
+  gsap.fromTo(galleryItems, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, paused: true });
+  
+  // Region map animation
+  gsap.fromTo('.map-region', 
+    { scale: 0.5, opacity: 0 }, 
+    { scale: 1, opacity: 1, duration: 1, stagger: 0.3, ease: 'elastic.out(1, 0.5)', paused: true }
+  );
+  
+  // Animation for each section when visible
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        if (entry.target.id === 'gallery') {
+          gsap.fromTo(
+            '.gallery-item', 
+            { opacity: 0, y: 30 }, 
+            { opacity: 1, y: 0, duration: 0.8, stagger: 0.2 }
+          );
+        }
+        
+        if (entry.target.id === 'lore') {
+          gsap.fromTo(
+            '.map-region', 
+            { scale: 0.5, opacity: 0 }, 
+            { scale: 1, opacity: 1, duration: 1, stagger: 0.3, ease: 'elastic.out(1, 0.5)' }
+          );
+          
+          gsap.fromTo(
+            '.lore-story', 
+            { opacity: 0, y: 20 }, 
+            { opacity: 1, y: 0, duration: 0.8, stagger: 0.3 }
+          );
+        }
+      }
+    });
+  }, { threshold: 0.3 });
+  
+  document.querySelectorAll('section').forEach(section => {
+    observer.observe(section);
+  });
+});
+</script>
+</body>
+</html>
