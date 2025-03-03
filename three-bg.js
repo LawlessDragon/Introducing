@@ -68,15 +68,23 @@ function createSnowflakeTexture() {
 }
 
 function initThreeJS() {
+  // Detect mobile devices and adjust particle counts accordingly
+  const isMobile = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  renderer = new THREE.WebGLRenderer({ 
-    canvas: document.getElementById('bgCanvas'), 
+  camera = new THREE.PerspectiveCamera(
+    isMobile ? 65 : 75, // Wider field of view on mobile
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  renderer = new THREE.WebGLRenderer({
+    canvas: document.getElementById('bgCanvas'),
     alpha: true,
-    antialias: true
+    antialias: !isMobile // Disable antialiasing on mobile for better performance
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
   
   // Create custom textures for prettier particles
   const iceTexture = createSnowflakeTexture();
@@ -84,7 +92,9 @@ function initThreeJS() {
   
   // Create ice particles (IceWing theme) - snowflake-like
   const iceGeometry = new THREE.BufferGeometry();
-  const iceCount = 700;
+  // Adjust particle counts based on device
+  const iceCount = isMobile ? 300 : 700;
+  const waterCount = isMobile ? 250 : 550;
   
   const icePosArray = new Float32Array(iceCount * 3);
   const iceScales = new Float32Array(iceCount);
@@ -94,9 +104,9 @@ function initThreeJS() {
   
   for (let i = 0; i < iceCount * 3; i += 3) {
     // Distribute particles throughout the entire screen height for continuous flow
-    icePosArray[i] = (Math.random() - 0.5) * 12;     // x
-    icePosArray[i+1] = (Math.random() - 0.5) * 16;   // y (full screen height)
-    icePosArray[i+2] = (Math.random() - 0.5) * 10;   // z
+    icePosArray[i] = (Math.random() - 0.5) * (isMobile ? 10 : 12);     // x - smaller range on mobile
+    icePosArray[i+1] = (Math.random() - 0.5) * (isMobile ? 14 : 16);   // y - smaller range on mobile
+    icePosArray[i+2] = (Math.random() - 0.5) * (isMobile ? 8 : 10);    // z - smaller range on mobile
     
     // Ice blue colors with slight variations
     iceColors[i] = 0.8 + Math.random() * 0.2;    // R (light blue)
@@ -105,14 +115,14 @@ function initThreeJS() {
   }
   
   for (let i = 0; i < iceCount; i++) {
-    // More moderate sized particles
-    iceScales[i] = Math.random() * 0.035 + 0.015;
+    // More moderate sized particles - slightly larger on mobile for visibility
+    iceScales[i] = Math.random() * (isMobile ? 0.045 : 0.035) + (isMobile ? 0.02 : 0.015);
     
-    // Random falling speeds for variety
-    iceVelocities[i] = Math.random() * 0.008 + 0.004;
+    // Random falling speeds - slightly slower on mobile for better performance
+    iceVelocities[i] = Math.random() * (isMobile ? 0.006 : 0.008) + (isMobile ? 0.003 : 0.004);
     
     // Random rotation speeds
-    iceRotations[i] = (Math.random() - 0.5) * 0.02;
+    iceRotations[i] = (Math.random() - 0.5) * (isMobile ? 0.015 : 0.02);
   }
   
   iceGeometry.setAttribute('position', new THREE.BufferAttribute(icePosArray, 3));
@@ -123,7 +133,7 @@ function initThreeJS() {
   
   // Ice particle material with custom texture
   const iceMaterial = new THREE.PointsMaterial({
-    size: 0.12,
+    size: isMobile ? 0.15 : 0.12,  // Slightly larger on mobile for better visibility
     map: iceTexture,
     vertexColors: true,
     transparent: true,
@@ -134,7 +144,8 @@ function initThreeJS() {
   
   // Create water particles (SeaWing theme)
   const waterGeometry = new THREE.BufferGeometry();
-  const waterCount = 550;
+  // Remove this line since waterCount is already declared above
+  // const waterCount = 550;  <- Remove this line
   
   const waterPosArray = new Float32Array(waterCount * 3);
   const waterScales = new Float32Array(waterCount);
