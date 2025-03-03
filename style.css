@@ -65,6 +65,7 @@ canvas {
 
 main {
   position: relative;
+  min-height: auto; /* Biarkan tinggi mengikuti konten */
 }
 
 section {
@@ -1318,6 +1319,7 @@ body {
     padding-top: 60px;
     padding-bottom: 60px;
   }
+  
 }
 #bgCanvas {
   position: fixed;
@@ -1327,4 +1329,10 @@ body {
   height: 100%;
   z-index: -1;
   pointer-events: none; /* Mencegah Three.js mengganggu interaksi */
+}
+
+html, body {
+  height: auto; /* Pastikan tidak mengunci tinggi */
+  overflow-x: hidden; /* Hindari horizontal scroll */
+  overflow-y: auto; /* Pastikan halaman bisa di-scroll */
 }
