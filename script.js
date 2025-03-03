@@ -82,36 +82,23 @@ navLinks.forEach(link => {
   });
 });
 
-// Add this code to your existing script.js file
-
 // Mobile menu functionality
 document.addEventListener('DOMContentLoaded', function() {
-  const mobileMenuBtn = document.querySelector('.mobile-menu-btn') || createMobileMenuBtn();
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
   const nav = document.querySelector('.nav');
-  
-  // Create mobile menu button if it doesn't exist
-  function createMobileMenuBtn() {
-    const btn = document.createElement('div');
-    btn.className = 'mobile-menu-btn';
-    
-    for (let i = 0; i < 3; i++) {
-      const span = document.createElement('span');
-      btn.appendChild(span);
-    }
-    
-    document.body.appendChild(btn);
-    return btn;
-  }
-  
-  // Toggle menu on button click
-  mobileMenuBtn.addEventListener('click', function() {
+
+  // Pastikan menu dalam keadaan tertutup saat halaman dimuat
+  nav.classList.remove('mobile-active');
+
+  // Toggle menu saat tombol ditekan
+  mobileMenuBtn.addEventListener('click', function(event) {
+    event.stopPropagation(); // Mencegah event dari bubble ke document
     this.classList.toggle('active');
     nav.classList.toggle('mobile-active');
   });
-  
-  // Close menu when clicking a link
-  const navLinks = document.querySelectorAll('.nav-link');
-  navLinks.forEach(link => {
+
+  // Tutup menu jika link diklik (hanya di mobile)
+  document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', function() {
       if (window.innerWidth < 768) {
         mobileMenuBtn.classList.remove('active');
@@ -119,13 +106,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
-  
-  // Close menu when clicking outside
+
+  // Tutup menu jika klik di luar
   document.addEventListener('click', function(event) {
-    const isClickInsideMenu = nav.contains(event.target);
-    const isClickOnMenuBtn = mobileMenuBtn.contains(event.target);
-    
-    if (!isClickInsideMenu && !isClickOnMenuBtn && nav.classList.contains('mobile-active')) {
+    if (!nav.contains(event.target) && !mobileMenuBtn.contains(event.target)) {
       mobileMenuBtn.classList.remove('active');
       nav.classList.remove('mobile-active');
     }
