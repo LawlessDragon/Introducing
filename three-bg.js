@@ -216,13 +216,16 @@ function initThreeJS() {
 
   // Handle touch events for mobile
   window.addEventListener('touchmove', (event) => {
-    event.preventDefault();
-    mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
-    
-    targetRotation.x = mouse.y * MAX_ROTATION;
-    targetRotation.y = mouse.x * MAX_ROTATION;
-  }, { passive: false });
+  if (event.target.tagName !== "CANVAS") return;  // Hanya berlaku di canvas, biarkan elemen lain bisa scroll
+  event.preventDefault();
+  
+  mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+
+  targetRotation.x = mouse.y * MAX_ROTATION;
+  targetRotation.y = mouse.x * MAX_ROTATION;
+}, { passive: false });
+
   
   animate();
 }
