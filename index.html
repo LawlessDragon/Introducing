@@ -13,6 +13,13 @@
   <div class="custom-cursor"></div>
   <canvas id="bgCanvas"></canvas>
 
+  <!-- Add mobile menu button -->
+  <div class="mobile-menu-btn">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
   <main>
     <section id="landing" class="landing">
       <h1>LAWLESS</h1>
@@ -280,5 +287,35 @@
 
   <script src="three-bg.js"></script>
   <script src="script.js"></script>
+  
+  <!-- Add mobile menu script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+      const nav = document.querySelector('.nav');
+      
+      mobileMenuBtn.addEventListener('click', function() {
+        this.classList.toggle('active');
+        nav.classList.toggle('mobile-active');
+      });
+      
+      // Close menu when clicking a link on mobile
+      const navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          if (window.innerWidth < 768) {
+            mobileMenuBtn.classList.remove('active');
+            nav.classList.remove('mobile-active');
+          }
+        });
+      });
+      
+      // Disable custom cursor on mobile devices
+      const customCursor = document.querySelector('.custom-cursor');
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        customCursor.style.display = 'none';
+      }
+    });
+  </script>
 </body>
 </html>
