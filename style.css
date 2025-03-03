@@ -1,423 +1,1321 @@
-// Background Canvas with Three.js - IceWing & SeaWing Theme with refined particles
-let scene, camera, renderer;
-let iceParticles, waterParticles;
-let time = 0;
-let mouse = { x: 0, y: 0 };
-let targetRotation = { x: 0, y: 0 };
-let currentRotation = { x: 0, y: 0 };
-const DAMPING = 0.05;
-const MAX_ROTATION = 0.2;
-
-// Create a custom texture for snowflake particles with random glow
-function createSnowflakeTexture() {
-  const canvas = document.createElement('canvas');
-  const size = 64;
-  canvas.width = size;
-  canvas.height = size;
-  
-  const context = canvas.getContext('2d');
-  // Make the background transparent instead of black
-  context.clearRect(0, 0, size, size);
-  
-  // Draw a snowflake shape
-  context.strokeStyle = 'white';
-  context.lineWidth = 1.5;
-  context.beginPath();
-  
-  // Draw six branches of a snowflake
-  for (let i = 0; i < 6; i++) {
-    context.save();
-    context.translate(size/2, size/2);
-    context.rotate(i * Math.PI / 3);
-    
-    // Main branch
-    context.moveTo(0, 0);
-    context.lineTo(0, size/2 - 4);
-    
-    // Add some smaller lines
-    for (let j = 1; j < 5; j++) {
-      const length = (size/8) * (1 - j/5);
-      const pos = j * (size/10);
-      
-      // Right side branches
-      context.moveTo(0, pos);
-      context.lineTo(length, pos + length/2);
-      
-      // Left side branches
-      context.moveTo(0, pos);
-      context.lineTo(-length, pos + length/2);
-    }
-    
-    context.restore();
-  }
-  context.stroke();
-  
-  // Add some radial gradient for a stronger glow
-  const gradient = context.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.4, 'rgba(210, 240, 255, 0.6)');
-  gradient.addColorStop(1, 'rgba(210, 240, 255, 0)');
-  
-  context.globalCompositeOperation = 'lighten';
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, size, size);
-  
-  const texture = new THREE.Texture(canvas);
-  texture.needsUpdate = true;
-  return texture;
+:root {
+  --primary: #0a84ff;
+  --secondary: #003366;
+  --accent: #00ffff;
+  --purple: #9d00ff;
+  --dark: #050a1c;
+  --light: #ffffff;
 }
 
-function initThreeJS() {
-  // Detect mobile devices and adjust particle counts accordingly
-  const isMobile = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(
-    isMobile ? 65 : 75, // Wider field of view on mobile
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  renderer = new THREE.WebGLRenderer({
-    canvas: document.getElementById('bgCanvas'),
-    alpha: true,
-    antialias: !isMobile // Disable antialiasing on mobile for better performance
-  });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
-  
-  // Create custom textures for prettier particles
-  const iceTexture = createSnowflakeTexture();
-  const glowTexture = createGlowTexture();
-  
-  // Create ice particles (IceWing theme) - snowflake-like
-  const iceGeometry = new THREE.BufferGeometry();
-  // Adjust particle counts based on device
-  const iceCount = isMobile ? 300 : 700;
-  const waterCount = isMobile ? 250 : 550;
-  
-  const icePosArray = new Float32Array(iceCount * 3);
-  const iceScales = new Float32Array(iceCount);
-  const iceColors = new Float32Array(iceCount * 3);
-  const iceVelocities = new Float32Array(iceCount);
-  const iceRotations = new Float32Array(iceCount);
-  
-  for (let i = 0; i < iceCount * 3; i += 3) {
-    // Distribute particles throughout the entire screen height for continuous flow
-    icePosArray[i] = (Math.random() - 0.5) * (isMobile ? 10 : 12);     // x - smaller range on mobile
-    icePosArray[i+1] = (Math.random() - 0.5) * (isMobile ? 14 : 16);   // y - smaller range on mobile
-    icePosArray[i+2] = (Math.random() - 0.5) * (isMobile ? 8 : 10);    // z - smaller range on mobile
-    
-    // Ice blue colors with slight variations
-    iceColors[i] = 0.8 + Math.random() * 0.2;    // R (light blue)
-    iceColors[i+1] = 0.9 + Math.random() * 0.1;  // G (almost white)
-    iceColors[i+2] = 1.0;                        // B (full blue)
-  }
-  
-  for (let i = 0; i < iceCount; i++) {
-    // More moderate sized particles - slightly larger on mobile for visibility
-    iceScales[i] = Math.random() * (isMobile ? 0.045 : 0.035) + (isMobile ? 0.02 : 0.015);
-    
-    // Random falling speeds - slightly slower on mobile for better performance
-    iceVelocities[i] = Math.random() * (isMobile ? 0.006 : 0.008) + (isMobile ? 0.003 : 0.004);
-    
-    // Random rotation speeds
-    iceRotations[i] = (Math.random() - 0.5) * (isMobile ? 0.015 : 0.02);
-  }
-  
-  iceGeometry.setAttribute('position', new THREE.BufferAttribute(icePosArray, 3));
-  iceGeometry.setAttribute('scale', new THREE.BufferAttribute(iceScales, 1));
-  iceGeometry.setAttribute('color', new THREE.BufferAttribute(iceColors, 3));
-  iceGeometry.userData.velocities = iceVelocities;
-  iceGeometry.userData.rotations = iceRotations;
-  
-  // Ice particle material with custom texture
-  const iceMaterial = new THREE.PointsMaterial({
-    size: isMobile ? 0.15 : 0.12,  // Slightly larger on mobile for better visibility
-    map: iceTexture,
-    vertexColors: true,
-    transparent: true,
-    opacity: 0.85,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-  
-  // Create water particles (SeaWing theme)
-  const waterGeometry = new THREE.BufferGeometry();
-  // Remove this line since waterCount is already declared above
-  // const waterCount = 550;  <- Remove this line
-  
-  const waterPosArray = new Float32Array(waterCount * 3);
-  const waterScales = new Float32Array(waterCount);
-  const waterColors = new Float32Array(waterCount * 3);
-  const waterPulsePhases = new Float32Array(waterCount);
-  
-  for (let i = 0; i < waterCount * 3; i += 3) {
-    // Position throughout the screen
-    waterPosArray[i] = (Math.random() - 0.5) * 12;      // x
-    waterPosArray[i+1] = (Math.random() - 0.5) * 16;    // y (full screen)
-    waterPosArray[i+2] = (Math.random() - 0.5) * 10;    // z
-    
-    // Brighter colors for firefly effect
-    waterColors[i] = 0.1 + Math.random() * 0.3;      // R (low)
-    waterColors[i+1] = 0.7 + Math.random() * 0.3;    // G (teal/cyan)
-    waterColors[i+2] = 0.8 + Math.random() * 0.2;    // B (deep blue)
-  }
-  
-  for (let i = 0; i < waterCount; i++) {
-    // More moderate size for firefly effect
-    waterScales[i] = Math.random() * 0.025 + 0.01;
-    
-    // Random phase for glowing effect
-    waterPulsePhases[i] = Math.random() * Math.PI * 2;
-  }
-  
-  waterGeometry.setAttribute('position', new THREE.BufferAttribute(waterPosArray, 3));
-  waterGeometry.setAttribute('scale', new THREE.BufferAttribute(waterScales, 1));
-  waterGeometry.setAttribute('color', new THREE.BufferAttribute(waterColors, 3));
-  waterGeometry.userData.pulsePhases = waterPulsePhases;
-  
-  // Water particle material with glow texture
-  const waterMaterial = new THREE.PointsMaterial({
-    size: 0.1,
-    map: glowTexture,
-    vertexColors: true,
-    transparent: true,
-    opacity: 0.9,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
-  });
-  
-  // Create meshes
-  iceParticles = new THREE.Points(iceGeometry, iceMaterial);
-  waterParticles = new THREE.Points(waterGeometry, waterMaterial);
-  
-  scene.add(iceParticles);
-  scene.add(waterParticles);
-  
-  camera.position.z = 3;
-  
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-  });
-
-  // Track mouse movement
-  window.addEventListener('mousemove', (event) => {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    
-    targetRotation.x = mouse.y * MAX_ROTATION;
-    targetRotation.y = mouse.x * MAX_ROTATION;
-  });
-
-  // Handle touch events for mobile
-  window.addEventListener('touchmove', (event) => {
-    event.preventDefault();
-    mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
-    
-    targetRotation.x = mouse.y * MAX_ROTATION;
-    targetRotation.y = mouse.x * MAX_ROTATION;
-  }, { passive: false });
-  
-  animate();
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
 }
 
-// Create a custom texture for snowflake particles with random glow
-function createSnowflakeTexture() {
-  const canvas = document.createElement('canvas');
-  const size = 64;
-  canvas.width = size;
-  canvas.height = size;
-  
-  const context = canvas.getContext('2d');
-  // Make the background transparent instead of black
-  context.clearRect(0, 0, size, size);
-  
-  // Draw a snowflake shape
-  context.strokeStyle = 'white';
-  context.lineWidth = 1.5;
-  context.beginPath();
-  
-  // Draw six branches of a snowflake
-  for (let i = 0; i < 6; i++) {
-    context.save();
-    context.translate(size/2, size/2);
-    context.rotate(i * Math.PI / 3);
-    
-    // Main branch
-    context.moveTo(0, 0);
-    context.lineTo(0, size/2 - 4);
-    
-    // Add some smaller lines
-    for (let j = 1; j < 5; j++) {
-      const length = (size/8) * (1 - j/5);
-      const pos = j * (size/10);
-      
-      // Right side branches
-      context.moveTo(0, pos);
-      context.lineTo(length, pos + length/2);
-      
-      // Left side branches
-      context.moveTo(0, pos);
-      context.lineTo(-length, pos + length/2);
-    }
-    
-    context.restore();
-  }
-  context.stroke();
-  
-  // Add some radial gradient for a stronger glow
-  const gradient = context.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.4, 'rgba(210, 240, 255, 0.6)');
-  gradient.addColorStop(1, 'rgba(210, 240, 255, 0)');
-  
-  context.globalCompositeOperation = 'lighten';
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, size, size);
-  
-  const texture = new THREE.Texture(canvas);
-  texture.needsUpdate = true;
-  return texture;
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--dark);
+  color: var(--light);
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
-// Create a custom texture for glowing particles
-function createGlowTexture() {
-  const canvas = document.createElement('canvas');
-  const size = 64;
-  canvas.width = size;
-  canvas.height = size;
-  
-  const context = canvas.getContext('2d');
-  // Remove black background - make it transparent instead
-  context.clearRect(0, 0, size, size);
-  
-  // Create a soft glow with radial gradient
-  const gradient = context.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.3, 'rgba(160, 220, 255, 0.5)');
-  gradient.addColorStop(0.7, 'rgba(120, 180, 255, 0.2)');
-  gradient.addColorStop(1, 'rgba(100, 150, 255, 0)');
-  
-  // We're drawing on a transparent background so no need to change composite operation
-  context.fillStyle = gradient;
-  context.beginPath();
-  context.arc(size/2, size/2, size/2, 0, Math.PI * 2);
-  context.fill();
-  
-  // Add a subtle star pattern
-  context.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-  context.lineWidth = 1;
-  
-  // Draw a simple star
-  context.beginPath();
-  for (let i = 0; i < 6; i++) {
-    const angle = i * Math.PI / 3;
-    const x1 = size/2 + Math.cos(angle) * (size/5);
-    const y1 = size/2 + Math.sin(angle) * (size/5);
-    const x2 = size/2 + Math.cos(angle) * (size/3);
-    const y2 = size/2 + Math.sin(angle) * (size/3);
-    
-    context.moveTo(x1, y1);
-    context.lineTo(x2, y2);
-  }
-  context.stroke();
-  
-  const texture = new THREE.Texture(canvas);
-  texture.needsUpdate = true;
-  return texture;
+.custom-cursor {
+  position: fixed;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 15px var(--accent);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  transition: width 0.3s, height 0.3s, background 0.3s;
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-  time += 0.005;
-
-  // Smooth camera rotation based on mouse position
-  currentRotation.x += (targetRotation.x - currentRotation.x) * DAMPING;
-  currentRotation.y += (targetRotation.y - currentRotation.y) * DAMPING;
-
-  camera.rotation.x = currentRotation.x;
-  camera.rotation.y = currentRotation.y;
-
-  // Rotate snowflake particles for prettier effect
-  iceParticles.rotation.z += 0.0005;
-  
-  // Ice particles falling like snow - seamless looping
-  const icePositions = iceParticles.geometry.attributes.position.array;
-  const iceVelocities = iceParticles.geometry.userData.velocities;
-  const iceRotations = iceParticles.geometry.userData.rotations;
-  const iceScales = iceParticles.geometry.attributes.scale.array;
-
-  for (let i = 0; i < icePositions.length; i += 3) {
-    // Apply individual falling velocities
-    icePositions[i+1] -= iceVelocities[i/3];
-    
-    // Add natural swaying motion like real snowflakes
-    icePositions[i] += Math.sin(time * 2 + i/3) * 0.002;
-    
-    // Rotate individual particles
-    iceParticles.geometry.userData.rotations[i/3] += 0.0001;
-    
-    // Seamless looping - when particle drops below view, reposition at top
-    if (icePositions[i+1] < -8) {
-      icePositions[i+1] = 8; // Reset to top
-      icePositions[i] = (Math.random() - 0.5) * 12;
-      icePositions[i+2] = (Math.random() - 0.5) * 10;
-      
-      // Vary the size slightly for next loop
-      iceScales[i/3] = Math.random() * 0.035 + 0.015;
-    }
-  }
-
-  iceParticles.geometry.attributes.position.needsUpdate = true;
-  iceParticles.geometry.attributes.scale.needsUpdate = true;
-
-  // Water particles move like fireflies - hovering with pulsing light
-  const waterPositions = waterParticles.geometry.attributes.position.array;
-  const waterPulsePhases = waterParticles.geometry.userData.pulsePhases;
-  const waterScales = waterParticles.geometry.attributes.scale.array;
-  const waterColors = waterParticles.geometry.attributes.color.array;
-
-  for (let i = 0; i < waterPositions.length; i += 3) {
-    // Gentle hovering motion 
-    waterPositions[i] += Math.sin(time + waterPulsePhases[i/3]) * 0.002;
-    waterPositions[i+1] += Math.cos(time + waterPulsePhases[i/3]) * 0.0015;
-    waterPositions[i+2] += Math.sin(time * 0.7 + waterPulsePhases[i/3]) * 0.001;
-    
-    // Glowing/pulsing effect
-    const pulseFactor = Math.sin(time * 2 + waterPulsePhases[i/3]) * 0.3 + 0.7;
-    waterScales[i/3] = (Math.random() * 0.025 + 0.01) * pulseFactor;
-    
-    // Some particles slowly drift downward
-    if (i % 9 === 0) {
-      waterPositions[i+1] -= 0.0008;
-      
-      // Loop when they go out of view
-      if (waterPositions[i+1] < -8) {
-        waterPositions[i+1] = 8;
-        waterPositions[i] = (Math.random() - 0.5) * 12;
-        waterPositions[i+2] = (Math.random() - 0.5) * 10;
-      }
-    }
-    
-    // Occasionally change color intensity for twinkling effect
-    if (Math.random() < 0.01) {
-      waterColors[i+1] = 0.7 + Math.random() * 0.3; // Vary green component
-      waterColors[i+2] = 0.8 + Math.random() * 0.2; // Vary blue component
-    }
-  }
-
-  waterParticles.geometry.attributes.position.needsUpdate = true;
-  waterParticles.geometry.attributes.scale.needsUpdate = true;
-  waterParticles.geometry.attributes.color.needsUpdate = true;
-
-  renderer.render(scene, camera);
+.custom-cursor.active {
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 255, 255, 0.1);
 }
 
-// Initialize Three.js background when window loads
-window.addEventListener('load', initThreeJS);
+.custom-cursor::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 5px;
+  height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+main {
+  position: relative;
+}
+
+section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Landing Page */
+.landing {
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.landing h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 5rem;
+  margin-bottom: 2rem;
+  color: var(--primary);
+  text-shadow: 0 0 20px var(--accent);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.landing p {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.typing-container {
+  height: 2rem;
+  margin-bottom: 3rem;
+  opacity: 0;
+}
+
+.enter-btn {
+  padding: 12px 35px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.2rem;
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  border-radius: 30px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.enter-btn:hover {
+  background: rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 20px var(--accent);
+  transform: translateY(-3px);
+}
+
+.enter-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5), transparent);
+  transform: translateX(-100%);
+}
+
+.enter-btn:hover::before {
+  animation: glitch-effect 1.5s infinite;
+}
+
+/* About Page */
+.about {
+  padding: 5rem 0;
+  opacity: 0;
+  display: none;
+}
+
+.about-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  padding: 0 2rem;
+}
+
+.avatar-container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(0, 132, 255, 0.5);
+  transform: perspective(1000px) rotateX(0deg);
+  transition: transform 0.3s ease-out;
+  transition: box-shadow 0.5s;
+}
+
+.avatar-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(200, 240, 255, 0.2), rgba(0, 150, 200, 0.2));
+  opacity: 0;
+  z-index: 2;
+  transition: opacity 0.5s;
+  pointer-events: none;
+}
+
+.avatar-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(200, 240, 255, 0.4), transparent);
+  transform: skewX(-25deg);
+  z-index: 3;
+  transition: left 0.8s;
+  pointer-events: none;
+}
+
+.avatar-container:hover {
+  box-shadow: 0 0 40px rgba(0, 200, 255, 0.7), 0 0 60px rgba(200, 240, 255, 0.4);
+}
+
+.avatar-container:hover::before {
+  opacity: 1;
+}
+
+.avatar-container:hover::after {
+  left: 150%;
+  transition: left 1.2s ease-in-out;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 0.5s;
+  filter: brightness(1);
+}
+
+.avatar-container:hover .avatar {
+  transform: scale(1.05);
+  filter: brightness(1.1) contrast(1.1);
+}
+
+.avatar-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 2rem;
+  background: linear-gradient(to top, rgba(0, 51, 102, 0.9), transparent);
+  transform: translateY(100%);
+  transition: transform 0.5s;
+  z-index: 4;
+}
+
+.avatar-container:hover .avatar-overlay {
+  transform: translateY(0);
+}
+
+/* Bioluminescent dots effect */
+.avatar-container .bioluminescent-dots {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.avatar-container:hover .bioluminescent-dots {
+  opacity: 1;
+}
+
+@keyframes float-up {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; }
+  100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+}
+
+.about-content h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  color: var(--primary);
+  text-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
+}
+
+.chat-container {
+  max-width: 100%;
+  margin-bottom: 3rem;
+}
+
+.chat-bubble {
+  background: linear-gradient(135deg, var(--secondary), rgba(0, 51, 102, 0.5));
+  padding: 1.5rem;
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+  position: relative;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.chat-bubble::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 20px;
+  border-width: 15px 15px 15px 0;
+  border-style: solid;
+  border-color: transparent var(--secondary) transparent transparent;
+}
+
+.fun-facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.fact-card {
+  height: 200px;
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.fact-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.fact-card:hover .fact-card-inner {
+  transform: rotateY(180deg);
+}
+
+.fact-front, .fact-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.fact-front {
+  background: linear-gradient(135deg, var(--primary), var(--purple));
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.fact-back {
+  background: linear-gradient(135deg, var(--purple), var(--accent));
+  color: white;
+  transform: rotateY(180deg);
+  font-size: 1rem;
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  max-width: 100%;
+  margin: 3rem 0;
+}
+
+.timeline::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  background: var(--primary);
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  margin-left: -3px;
+  box-shadow: 0 0 15px var(--accent);
+}
+
+.timeline-item {
+  padding: 10px 40px;
+  position: relative;
+  width: 50%;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.timeline-item::after {
+  content: '';
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  background: var(--accent);
+  border-radius: 50%;
+  top: 15px;
+  border: 4px solid var(--primary);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.timeline-left {
+  left: 0;
+  text-align: right;
+}
+
+.timeline-right {
+  left: 50%;
+  text-align: left;
+}
+
+.timeline-left::after {
+  right: -13px;
+}
+
+.timeline-right::after {
+  left: -13px;
+}
+
+.timeline-content {
+  padding: 20px;
+  background: rgba(0, 51, 102, 0.7);
+  border-radius: 15px;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.timeline-date {
+  font-family: 'Orbitron', sans-serif;
+  color: var(--accent);
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Gallery */
+.gallery {
+  padding: 5rem 2rem;
+  opacity: 0;
+  display: none;
+  position: relative;
+}
+
+.gallery-mode-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 51, 102, 0.7);
+  border: 1px solid var(--accent);
+  color: var(--light);
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-family: 'Orbitron', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  z-index: 10;
+}
+
+.gallery-mode-toggle:hover {
+  background: rgba(0, 100, 200, 0.7);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+}
+
+.gallery.night-mode {
+  background: linear-gradient(to bottom, rgba(0, 10, 30, 0.9), rgba(0, 20, 50, 0.95));
+}
+
+.gallery.night-mode .gallery-item {
+  box-shadow: 0 10px 30px rgba(0, 200, 255, 0.2);
+}
+
+.gallery.night-mode .gallery-overlay {
+  background: rgba(0, 30, 60, 0.7);
+}
+
+.gallery h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: var(--primary);
+  text-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  aspect-ratio: 1;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.gallery-item:hover .gallery-img {
+  transform: scale(1.1);
+}
+
+.gallery-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 51, 102, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 2rem;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.gallery-item:hover .gallery-overlay {
+  opacity: 1;
+}
+
+.gallery-overlay h3 {
+  font-family: 'Orbitron', sans-serif;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+
+/* Lore Page */
+.lore {
+  padding: 5rem 2rem;
+  opacity: 0;
+  display: none;
+}
+
+.lore-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.lore h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: var(--primary);
+  text-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
+}
+
+.lore-map {
+  width: 100%;
+  height: 400px;
+  background: linear-gradient(to bottom, rgba(0, 50, 100, 0.8), rgba(0, 100, 150, 0.6)), url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MXx8fGVufDB8fHx8&w=1000&q=80') no-repeat center center;
+  background-size: cover;
+  position: relative;
+  margin-bottom: 3rem;
+  border-radius: 15px;
+  box-shadow: 0 0 30px rgba(0, 132, 255, 0.3), inset 0 0 100px rgba(0, 255, 255, 0.2);
+  overflow: hidden;
+  border: 1px solid rgba(0, 200, 255, 0.3);
+}
+
+.map-region {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 132, 255, 0.2);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 20px var(--accent);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.map-region:hover {
+  background: rgba(0, 132, 255, 0.4);
+  transform: scale(1.1);
+}
+
+.map-region::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  border-radius: 50%;
+  background: rgba(0, 255, 255, 0.2);
+  opacity: 0;
+  transition: opacity 0.5s, transform 1s;
+}
+
+.map-region:hover::before {
+  opacity: 1;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+}
+
+.region-1 {
+  top: 20%;
+  left: 25%;
+  width: 60px;
+  height: 60px;
+  background: rgba(200, 240, 255, 0.3); /* Ice theme */
+  border-color: rgba(200, 240, 255, 0.8);
+  box-shadow: 0 0 20px rgba(200, 240, 255, 0.8);
+}
+
+.region-2 {
+  top: 70%;
+  left: 60%;
+  width: 70px;
+  height: 70px;
+  background: rgba(0, 150, 200, 0.3); /* Water theme */
+  border-color: rgba(0, 200, 255, 0.8);
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.8);
+}
+
+.region-3 {
+  top: 45%;
+  left: 40%;
+  width: 65px;
+  height: 65px;
+  background: rgba(100, 200, 255, 0.3); /* Crystal theme - mix of ice and water */
+  border-color: rgba(150, 230, 255, 0.8);
+  box-shadow: 0 0 25px rgba(150, 230, 255, 0.8);
+}
+
+.lore-story {
+  background: rgba(10, 20, 30, 0.7);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.lore-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--accent);
+}
+
+.cinematic-text {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  position: relative;
+  opacity: 0;
+}
+
+/* Contact Page */
+.contact {
+  padding: 5rem 2rem;
+  opacity: 0;
+  display: none;
+}
+
+.contact-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.contact h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: var(--primary);
+  text-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
+}
+
+.contact-form {
+  background: rgba(10, 20, 30, 0.7);
+  border-radius: 15px;
+  padding: 3rem;
+  margin-bottom: 3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+.form-group {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(0, 20, 40, 0.6);
+  border: none;
+  border-bottom: 2px solid var(--primary);
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+  box-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.form-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transition: all 0.3s;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.form-input:focus + .form-label,
+.form-input:not(:placeholder-shown) + .form-label {
+  transform: translateY(-20px);
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+
+textarea.form-input {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.submit-btn {
+  padding: 1rem 2rem;
+  font-family: 'Orbitron', sans-serif;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 5px 15px rgba(0, 132, 255, 0.3);
+}
+
+.submit-btn:hover {
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 132, 255, 0.5);
+}
+
+.social-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.social-link {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.social-link:hover {
+  transform: translateY(-5px) scale(1.1);
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  box-shadow: 0 10px 20px rgba(0, 132, 255, 0.5), 0 0 30px var(--accent);
+}
+
+.social-icon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.qr-container {
+  margin-top: 4rem;
+  text-align: center;
+}
+
+.qr-code {
+  width: 200px;
+  height: 200px;
+  background: white;
+  padding: 1rem;
+  border-radius: 15px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+.qr-code img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Navigation */
+.nav {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 20, 40, 0.7);
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  display: flex;
+  gap: 1.5rem;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+}
+
+.nav-link {
+  color: var(--light);
+  text-decoration: none;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  transition: all 0.3s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: rgba(0, 132, 255, 0.3);
+  color: var(--accent);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+}
+
+/* Animations */
+@keyframes floatingAnimation {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes glitch-effect {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(0, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 255, 0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .landing h1 {
+    font-size: 3.5rem;
+  }
+
+  .landing p {
+    font-size: 1.2rem;
+  }
+
+  .about-container {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 2rem;
+  }
+
+  .avatar-container {
+    height: 400px;
+  }
+
+  .social-links {
+    gap: 1.5rem;
+  }
+
+  .social-link {
+    width: 50px;
+    height: 50px;
+  }
+
+  .qr-code {
+    width: 180px;
+    height: 180px;
+  }
+
+  .timeline::after {
+    left: 31px;
+  }
+
+  .timeline-item {
+    width: 100%;
+    padding-left: 70px;
+    padding-right: 25px;
+  }
+
+  .timeline-right, .timeline-left {
+    left: 0;
+    text-align: left;
+  }
+
+  .timeline-left::after, .timeline-right::after {
+    left: 15px;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .fun-facts {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .chat-bubble {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .landing h1 {
+    font-size: 2.5rem;
+    padding: 0 1rem;
+  }
+
+  .landing p {
+    font-size: 1.2rem;
+    padding: 0 1rem;
+  }
+
+  .nav {
+    width: 90%;
+    padding: 0.8rem 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .nav-link {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .about-content h2 {
+    font-size: 2rem;
+  }
+
+  .avatar-container {
+    height: 300px;
+  }
+
+  .social-links {
+    gap: 1rem;
+  }
+
+  .social-link {
+    width: 50px;
+    height: 50px;
+  }
+
+  .qr-code {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .about-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .avatar-container {
+    width: 80%;
+    height: auto;
+    margin: 0 auto;
+  }
+
+  .timeline::after {
+    left: 20px;
+  }
+
+  .timeline-item {
+    width: 100%;
+    text-align: left;
+    padding-left: 50px;
+  }
+
+  .timeline-left::after,
+  .timeline-right::after {
+    left: 10px;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .custom-cursor {
+    display: none;
+  }
+}
+
+/* Add these mobile styles to your existing CSS file */
+
+/* Mobile menu button */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 30px;
+  height: 25px;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.mobile-menu-btn span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-btn.active span:nth-child(1) {
+  transform: translateY(11px) rotate(45deg);
+}
+
+.mobile-menu-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-btn.active span:nth-child(3) {
+  transform: translateY(-11px) rotate(-45deg);
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  /* Show mobile menu button */
+  .mobile-menu-btn {
+    display: flex;
+  }
+  
+  /* Navigation menu for mobile */
+  .nav {
+    display: none; /* Default: disembunyikan */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    text-align: center;
+    padding: 10px 0;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .nav.mobile-active {
+    display: block; /* Tampilkan saat aktif */
+  }
+  
+  .mobile-menu-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 1000;
+  }
+  
+  .mobile-menu-btn span {
+    display: block;
+    width: 30px;
+    height: 4px;
+    background: white;
+    margin: 5px;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .mobile-menu-btn.active span:nth-child(1) {
+    transform: translateY(9px) rotate(45deg);
+  }
+  
+  .mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .mobile-menu-btn.active span:nth-child(3) {
+    transform: translateY(-9px) rotate(-45deg);
+  }  
+  
+  .nav-link {
+    margin: 15px 0;
+    font-size: 1.2rem;
+  }
+  
+  /* Landing section */
+  .landing h1 {
+    font-size: 3rem;
+  }
+  
+  /* About section */
+  .about-container {
+    flex-direction: column;
+  }
+  
+  .avatar-container {
+    width: 80%;
+    margin: 0 auto 30px;
+  }
+  
+  /* Timeline adjustments */
+  .timeline {
+    padding: 0 10px;
+  }
+  
+  .timeline-item {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .timeline-left, .timeline-right {
+    left: 0;
+  }
+  
+  /* Fun facts */
+  .fun-facts {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  /* Gallery */
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Lore section */
+  .lore-map {
+    height: 200px;
+  }
+  
+  .lore-story {
+    padding: 15px;
+  }
+  
+  /* Contact form */
+  .contact-form {
+    width: 100%;
+  }
+  
+  .social-links {
+    justify-content: center;
+  }
+  
+  .qr-container {
+    width: 80%;
+    margin: 30px auto;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .landing h1 {
+    font-size: 2.5rem;
+  }
+  
+  .fun-facts {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .submit-btn {
+    width: 100%;
+  }
+}
+
+/* Add these styles to fix scrolling and mobile menu issues */
+
+body {
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  position: relative;
+}
+
+/* Mobile menu improvements */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 30px;
+  height: 25px;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  z-index: 1000;
+  background-color: rgba(0, 20, 40, 0.7); /* Semi-transparent background */
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.mobile-menu-btn span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-btn.active span:nth-child(1) {
+  transform: translateY(11px) rotate(45deg);
+}
+
+.mobile-menu-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-btn.active span:nth-child(3) {
+  transform: translateY(-11px) rotate(-45deg);
+}
+
+/* Navigation menu for mobile */
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+  
+  .nav {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 70%;
+    height: 100vh;
+    background: rgba(0, 10, 30, 0.95);
+    flex-direction: column;
+    padding-top: 80px;
+    transition: right 0.3s ease;
+    z-index: 999;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+  }
+  
+  .nav.mobile-active {
+    right: 0;
+  }
+  
+  .nav-link {
+    margin: 15px 0;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+  
+  /* Fix section scrolling */
+  main {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+  }
+  
+  section {
+    padding-left: 15px;
+    padding-right: 15px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+  
+  /* Ensure content doesn't get hidden under fixed elements */
+  .landing, .about, .gallery, .lore, .contact {
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+}
