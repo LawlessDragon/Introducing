@@ -14,7 +14,6 @@ document.addEventListener('mouseup', () => {
   cursor.classList.remove('active');
 });
 
-
 // Text typing effect
 const typingText = document.getElementById('typing-text');
 const textToType = [
@@ -80,6 +79,64 @@ navLinks.forEach(link => {
       { opacity: 0, y: 30 },
       { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }
     );
+  });
+});
+
+// Add this code to your existing script.js file
+
+// Mobile menu functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn') || createMobileMenuBtn();
+  const nav = document.querySelector('.nav');
+  
+  // Create mobile menu button if it doesn't exist
+  function createMobileMenuBtn() {
+    const btn = document.createElement('div');
+    btn.className = 'mobile-menu-btn';
+    
+    for (let i = 0; i < 3; i++) {
+      const span = document.createElement('span');
+      btn.appendChild(span);
+    }
+    
+    document.body.appendChild(btn);
+    return btn;
+  }
+  
+  // Toggle menu on button click
+  mobileMenuBtn.addEventListener('click', function() {
+    this.classList.toggle('active');
+    nav.classList.toggle('mobile-active');
+  });
+  
+  // Close menu when clicking a link
+  const navLinks = document.querySelectorAll('.nav-link');
+  navLinks.forEach(link => {
+    link.addEventListener('click', function() {
+      if (window.innerWidth < 768) {
+        mobileMenuBtn.classList.remove('active');
+        nav.classList.remove('mobile-active');
+      }
+    });
+  });
+  
+  // Close menu when clicking outside
+  document.addEventListener('click', function(event) {
+    const isClickInsideMenu = nav.contains(event.target);
+    const isClickOnMenuBtn = mobileMenuBtn.contains(event.target);
+    
+    if (!isClickInsideMenu && !isClickOnMenuBtn && nav.classList.contains('mobile-active')) {
+      mobileMenuBtn.classList.remove('active');
+      nav.classList.remove('mobile-active');
+    }
+  });
+  
+  // Prevent menu from blocking scrolling
+  window.addEventListener('scroll', function() {
+    if (window.innerWidth < 768 && nav.classList.contains('mobile-active')) {
+      // Allow content to scroll behind the menu
+      document.body.style.overflow = 'auto';
+    }
   });
 });
 
@@ -179,145 +236,177 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+function createParticle(container, config) {
+  const particle = document.createElement('div');
+  Object.assign(particle.style, config.style);
+  container.appendChild(particle);
+
+  setTimeout(() => {
+    particle.style.opacity = config.finalOpacity || '1';
+    particle.style.transform = config.finalTransform;
+  }, config.delay || 0);
+
+  return particle;
+}
+
 function activateEasterEgg() {
   // Create overlay container
   const dragonRoar = document.createElement('div');
-  dragonRoar.style.position = 'fixed';
-  dragonRoar.style.top = '0';
-  dragonRoar.style.left = '0';
-  dragonRoar.style.width = '100%';
-  dragonRoar.style.height = '100%';
-  dragonRoar.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-  dragonRoar.style.display = 'flex';
-  dragonRoar.style.alignItems = 'center';
-  dragonRoar.style.justifyContent = 'center';
-  dragonRoar.style.zIndex = '9999';
-  dragonRoar.style.fontFamily = 'Orbitron, sans-serif';
-  dragonRoar.style.fontSize = '3rem';
-  dragonRoar.style.color = 'var(--accent)';
-  dragonRoar.style.textShadow = '0 0 20px var(--accent)';
-  dragonRoar.style.flexDirection = 'column';
-  dragonRoar.style.overflow = 'hidden';
-  
-  // Create ice crack effect
-  const iceCrack = document.createElement('div');
-  iceCrack.style.position = 'absolute';
-  iceCrack.style.top = '0';
-  iceCrack.style.left = '0';
-  iceCrack.style.width = '100%';
-  iceCrack.style.height = '100%';
-  iceCrack.style.background = 'radial-gradient(circle at center, transparent 0%, transparent 30%, rgba(0, 150, 255, 0.1) 70%, rgba(0, 150, 255, 0.3) 100%)';
-  iceCrack.style.opacity = '0';
-  iceCrack.style.transition = 'opacity 0.5s';
-  dragonRoar.appendChild(iceCrack);
-  
-  // Create water ripple effect
-  const waterRipple = document.createElement('div');
-  waterRipple.style.position = 'absolute';
-  waterRipple.style.bottom = '0';
-  waterRipple.style.left = '0';
-  waterRipple.style.width = '100%';
-  waterRipple.style.height = '50%';
-  waterRipple.style.background = 'linear-gradient(to top, rgba(0, 255, 255, 0.3), transparent)';
-  waterRipple.style.opacity = '0';
-  waterRipple.style.transition = 'opacity 0.5s';
-  dragonRoar.appendChild(waterRipple);
-  
-  // Create bioluminescent particles
+  Object.assign(dragonRoar.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: '9999',
+    fontFamily: 'Orbitron, sans-serif',
+    fontSize: '3rem',
+    color: 'var(--accent)',
+    textShadow: '0 0 20px var(--accent)',
+    flexDirection: 'column',
+    overflow: 'hidden'
+  });
+
+  // Create effects
+  const effects = {
+    iceCrack: {
+      style: {
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        background: 'radial-gradient(circle at center, transparent 0%, transparent 30%, rgba(0, 150, 255, 0.1) 70%, rgba(0, 150, 255, 0.3) 100%)',
+        opacity: '0',
+        transition: 'opacity 0.5s'
+      },
+      finalOpacity: '1'
+    },
+    waterRipple: {
+      style: {
+        position: 'absolute',
+        bottom: '0',
+        left: '0',
+        width: '100%',
+        height: '50%',
+        background: 'linear-gradient(to top, rgba(0, 255, 255, 0.3), transparent)',
+        opacity: '0',
+        transition: 'opacity 0.5s'
+      },
+      finalOpacity: '1'
+    }
+  };
+
+  // Create and add effects
+  const iceCrack = createParticle(dragonRoar, effects.iceCrack);
+  const waterRipple = createParticle(dragonRoar, effects.waterRipple);
+
+  // Create particles
   for (let i = 0; i < 50; i++) {
-    const particle = document.createElement('div');
-    particle.style.position = 'absolute';
-    particle.style.width = Math.random() * 10 + 5 + 'px';
-    particle.style.height = particle.style.width;
-    particle.style.borderRadius = '50%';
-    particle.style.backgroundColor = `rgba(${Math.random() * 100}, ${150 + Math.random() * 105}, ${200 + Math.random() * 55}, 0.8)`;
-    particle.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.8)';
-    particle.style.left = Math.random() * 100 + '%';
-    particle.style.top = 50 + Math.random() * 50 + '%';
-    particle.style.opacity = '0';
-    particle.style.transition = 'opacity 0.5s, transform 2s';
-    particle.style.transform = 'translateY(100px)';
-    dragonRoar.appendChild(particle);
-    
-    // Animate particles
-    setTimeout(() => {
-      particle.style.opacity = '1';
-      particle.style.transform = `translateY(${-Math.random() * 200}px)`;
-    }, 500 + Math.random() * 1000);
+    createParticle(dragonRoar, {
+      style: {
+        position: 'absolute',
+        width: `${Math.random() * 10 + 5}px`,
+        height: 'inherit',
+        borderRadius: '50%',
+        backgroundColor: `rgba(${Math.random() * 100}, ${150 + Math.random() * 105}, ${200 + Math.random() * 55}, 0.8)`,
+        boxShadow: '0 0 10px rgba(0, 255, 255, 0.8)',
+        left: `${Math.random() * 100}%`,
+        top: `${50 + Math.random() * 50}%`,
+        opacity: '0',
+        transition: 'opacity 0.5s, transform 2s'
+      },
+      finalOpacity: '1',
+      finalTransform: `translateY(${-Math.random() * 200}px)`,
+      delay: 500 + Math.random() * 1000
+    });
   }
-  
-  // Create ice crystals
+
+  // Create crystals
   for (let i = 0; i < 30; i++) {
-    const crystal = document.createElement('div');
-    crystal.style.position = 'absolute';
-    crystal.style.width = Math.random() * 20 + 10 + 'px';
-    crystal.style.height = crystal.style.width;
-    crystal.style.backgroundColor = 'rgba(200, 240, 255, 0.6)';
-    crystal.style.boxShadow = '0 0 15px rgba(200, 240, 255, 0.8)';
-    crystal.style.left = Math.random() * 100 + '%';
-    crystal.style.top = Math.random() * 50 + '%';
-    crystal.style.clipPath = 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
-    crystal.style.opacity = '0';
-    crystal.style.transition = 'opacity 0.5s, transform 1s';
-    crystal.style.transform = 'scale(0) rotate(0deg)';
-    dragonRoar.appendChild(crystal);
-    
-    // Animate crystals
-    setTimeout(() => {
-      crystal.style.opacity = '0.8';
-      crystal.style.transform = `scale(1) rotate(${Math.random() * 360}deg)`;
-    }, 200 + Math.random() * 800);
+    createParticle(dragonRoar, {
+      style: {
+        position: 'absolute',
+        width: `${Math.random() * 20 + 10}px`,
+        height: 'inherit',
+        backgroundColor: 'rgba(200, 240, 255, 0.6)',
+        boxShadow: '0 0 15px rgba(200, 240, 255, 0.8)',
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 50}%`,
+        clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+        opacity: '0',
+        transition: 'opacity 0.5s, transform 1s',
+        transform: 'scale(0) rotate(0deg)'
+      },
+      finalOpacity: '0.8',
+      finalTransform: `scale(1) rotate(${Math.random() * 360}deg)`,
+      delay: 200 + Math.random() * 800
+    });
   }
-  
-  // Add roar text
+
+  // Add text elements
   const roarText = document.createElement('div');
   roarText.innerHTML = 'ROAAAARRR!!! 🐉✨';
-  roarText.style.position = 'relative';
-  roarText.style.zIndex = '10';
-  roarText.style.textShadow = '0 0 20px var(--accent), 0 0 40px var(--primary)';
-  roarText.style.opacity = '0';
-  roarText.style.transform = 'scale(0.5)';
-  roarText.style.transition = 'opacity 0.5s, transform 0.5s';
-  dragonRoar.appendChild(roarText);
-  
-  // Add description text
+  Object.assign(roarText.style, {
+    position: 'relative',
+    zIndex: '10',
+    textShadow: '0 0 20px var(--accent), 0 0 40px var(--primary)',
+    opacity: '0',
+    transform: 'scale(0.5)',
+    transition: 'opacity 0.5s, transform 0.5s'
+  });
+
   const descText = document.createElement('div');
   descText.innerHTML = 'Kekuatan IceWing & SeaWing telah aktif!';
-  descText.style.fontSize = '1.5rem';
-  descText.style.marginTop = '20px';
-  descText.style.opacity = '0';
-  descText.style.transition = 'opacity 0.5s';
+  Object.assign(descText.style, {
+    fontSize: '1.5rem',
+    marginTop: '20px',
+    opacity: '0',
+    transition: 'opacity 0.5s'
+  });
+
+  dragonRoar.appendChild(roarText);
   dragonRoar.appendChild(descText);
-  
-  // Add sound effect
-  const roarSound = new Audio('https://freesound.org/data/previews/316/316068_5385832-lq.mp3');
-  const iceSound = new Audio('https://freesound.org/data/previews/411/411089_5121236-lq.mp3');
-  const waterSound = new Audio('https://freesound.org/data/previews/275/275645_5379050-lq.mp3');
-  
+
+  // Add sound effects
+  const sounds = {
+    roar: new Audio('https://freesound.org/data/previews/316/316068_5385832-lq.mp3'),
+    ice: new Audio('https://freesound.org/data/previews/411/411089_5121236-lq.mp3'),
+    water: new Audio('https://freesound.org/data/previews/275/275645_5379050-lq.mp3')
+  };
+
   document.body.appendChild(dragonRoar);
-  
-  // Sequence animations
+
+  // Animation sequence
+  const playSound = (sound) => {
+    try { sound.play(); } catch(e) { console.log('Sound play failed:', e); }
+  };
+
   setTimeout(() => {
     iceCrack.style.opacity = '1';
-    try { iceSound.play(); } catch(e) { console.log('Sound play failed:', e); }
+    playSound(sounds.ice);
   }, 300);
-  
+
   setTimeout(() => {
     waterRipple.style.opacity = '1';
-    try { waterSound.play(); } catch(e) { console.log('Sound play failed:', e); }
+    playSound(sounds.water);
   }, 800);
-  
+
   setTimeout(() => {
     roarText.style.opacity = '1';
     roarText.style.transform = 'scale(1)';
-    try { roarSound.play(); } catch(e) { console.log('Sound play failed:', e); }
+    playSound(sounds.roar);
   }, 1200);
-  
+
   setTimeout(() => {
     descText.style.opacity = '1';
   }, 1800);
-  
-  // Remove after animation completes
+
+  // Cleanup
   setTimeout(() => {
     document.body.removeChild(dragonRoar);
   }, 5000);
