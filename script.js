@@ -87,17 +87,16 @@ document.addEventListener('DOMContentLoaded', function() {
   const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
   const nav = document.querySelector('.nav');
 
-  // Pastikan menu dalam keadaan tertutup saat halaman dimuat
+  // Pastikan menu tertutup secara default
   nav.classList.remove('mobile-active');
 
-  // Toggle menu saat tombol ditekan
   mobileMenuBtn.addEventListener('click', function(event) {
-    event.stopPropagation(); // Mencegah event dari bubble ke document
+    event.stopPropagation();
     this.classList.toggle('active');
     nav.classList.toggle('mobile-active');
   });
 
-  // Tutup menu jika link diklik (hanya di mobile)
+  // Tutup menu jika link diklik (di mobile)
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', function() {
       if (window.innerWidth < 768) {
