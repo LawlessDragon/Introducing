@@ -123,6 +123,11 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+window.addEventListener('DOMContentLoaded', () => {
+  document.body.style.overflow = 'auto';
+});
+
+
 // Enter button click
 const enterButton = document.querySelector('.enter-btn');
 
