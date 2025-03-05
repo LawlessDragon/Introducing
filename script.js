@@ -51,7 +51,6 @@ function typeText() {
 
 // Sections navigation
 const sections = ['landing', 'about', 'gallery', 'lore', 'contact'];
-const navLinks = document.querySelectorAll('.nav-link');
 
 navLinks.forEach(link => {
   link.addEventListener('click', (e) => {
@@ -82,42 +81,75 @@ navLinks.forEach(link => {
   });
 });
 
+// Mobile Menu Functionality
+const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+const nav = document.querySelector('.nav');
+
+mobileMenuBtn.addEventListener('click', () => {
+  mobileMenuBtn.classList.toggle('active');
+  nav.classList.toggle('mobile-active');
+});
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+  if (!nav.contains(e.target) && !mobileMenuBtn.contains(e.target) && nav.classList.contains('mobile-active')) {
+    mobileMenuBtn.classList.remove('active');
+    nav.classList.remove('mobile-active');
+  }
+});
+
+// Close menu when clicking nav links
+const navLinks = document.querySelectorAll('.nav-link');
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    mobileMenuBtn.classList.remove('active');
+    nav.classList.remove('mobile-active');
+  });
+});
+
 // Mobile menu functionality
 document.addEventListener('DOMContentLoaded', function() {
   const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
   const nav = document.querySelector('.nav');
-
-  // Pastikan menu tertutup secara default
-  nav.classList.remove('mobile-active');
-
+  const overlay = document.createElement('div');
+  
+  // Create overlay for mobile menu
+  overlay.className = 'mobile-menu-overlay';
+  document.body.appendChild(overlay);
+  
+  // Toggle menu and overlay
   mobileMenuBtn.addEventListener('click', function(event) {
     event.stopPropagation();
     this.classList.toggle('active');
     nav.classList.toggle('mobile-active');
-  });
-
-  // Tutup menu jika link diklik (di mobile)
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', function() {
-      if (window.innerWidth < 768) {
-        mobileMenuBtn.classList.remove('active');
-        nav.classList.remove('mobile-active');
-      }
-    });
-  });
-
-  // Tutup menu jika klik di luar
-  document.addEventListener('click', function(event) {
-    if (!nav.contains(event.target) && !mobileMenuBtn.contains(event.target)) {
-      mobileMenuBtn.classList.remove('active');
-      nav.classList.remove('mobile-active');
-    }
+    overlay.classList.toggle('active');
+    document.body.style.overflow = nav.classList.contains('mobile-active') ? 'hidden' : 'auto';
   });
   
-  // Prevent menu from blocking scrolling
-  window.addEventListener('scroll', function() {
-    if (window.innerWidth < 768 && nav.classList.contains('mobile-active')) {
-      // Allow content to scroll behind the menu
+  // Close menu when clicking overlay
+  overlay.addEventListener('click', function() {
+    mobileMenuBtn.classList.remove('active');
+    nav.classList.remove('mobile-active');
+    overlay.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  });
+  
+  // Close menu when clicking links
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function() {
+      mobileMenuBtn.classList.remove('active');
+      nav.classList.remove('mobile-active');
+      overlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+  });
+  
+  // Handle resize events
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+      mobileMenuBtn.classList.remove('active');
+      nav.classList.remove('mobile-active');
+      overlay.classList.remove('active');
       document.body.style.overflow = 'auto';
     }
   });
