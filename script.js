@@ -256,89 +256,90 @@ function activateEasterEgg() {
     color: 'var(--accent)',
     textShadow: '0 0 20px var(--accent)',
     flexDirection: 'column',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    opacity: '0',
+    transition: 'opacity 0.5s ease-in-out'
   });
 
-  // Create effects
-  const effects = {
-    iceCrack: {
-      style: {
-        position: 'absolute',
-        top: '0',
-        left: '0',
-        width: '100%',
-        height: '100%',
-        background: 'radial-gradient(circle at center, transparent 0%, transparent 30%, rgba(0, 150, 255, 0.1) 70%, rgba(0, 150, 255, 0.3) 100%)',
-        opacity: '0',
-        transition: 'opacity 0.5s'
-      },
-      finalOpacity: '1'
-    },
-    waterRipple: {
-      style: {
-        position: 'absolute',
-        bottom: '0',
-        left: '0',
-        width: '100%',
-        height: '50%',
-        background: 'linear-gradient(to top, rgba(0, 255, 255, 0.3), transparent)',
-        opacity: '0',
-        transition: 'opacity 0.5s'
-      },
-      finalOpacity: '1'
-    }
+  // Create enhanced blue vignette effect
+  const vignette = document.createElement('div');
+  Object.assign(vignette.style, {
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0, 150, 255, 0.05) 30%, rgba(0, 150, 255, 0.2) 60%, rgba(0, 150, 255, 0.4) 80%, rgba(0, 150, 255, 0.6) 100%)',
+    opacity: '0',
+    transition: 'opacity 0.5s',
+    pointerEvents: 'none'
+  });
+  dragonRoar.appendChild(vignette);
+
+  // Create lightning effects
+  const createLightning = () => {
+    const lightning = document.createElement('div');
+    const side = Math.random() < 0.5 ? 'left' : 'right';
+    const startY = Math.random() * 100;
+    
+    Object.assign(lightning.style, {
+      position: 'absolute',
+      [side]: '0',
+      top: `${startY}%`,
+      width: '150px',
+      height: '3px',
+      background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(0,150,255,1) 100%)',
+      filter: 'blur(2px)',
+      opacity: '0',
+      transform: `rotate(${side === 'left' ? '20deg' : '-20deg'})`
+    });
+
+    dragonRoar.appendChild(lightning);
+
+    // Animate lightning
+    setTimeout(() => {
+      lightning.style.opacity = '1';
+      lightning.style.transition = 'opacity 0.1s';
+      setTimeout(() => {
+        lightning.style.opacity = '0';
+        setTimeout(() => dragonRoar.removeChild(lightning), 100);
+      }, 100);
+    }, Math.random() * 2000);
   };
 
-  // Create and add effects
-  const iceCrack = createParticle(dragonRoar, effects.iceCrack);
-  const waterRipple = createParticle(dragonRoar, effects.waterRipple);
-
-  // Create particles
-  for (let i = 0; i < 50; i++) {
-    createParticle(dragonRoar, {
-      style: {
-        position: 'absolute',
-        width: `${Math.random() * 10 + 5}px`,
-        height: 'inherit',
-        borderRadius: '50%',
-        backgroundColor: `rgba(${Math.random() * 100}, ${150 + Math.random() * 105}, ${200 + Math.random() * 55}, 0.8)`,
-        boxShadow: '0 0 10px rgba(0, 255, 255, 0.8)',
-        left: `${Math.random() * 100}%`,
-        top: `${50 + Math.random() * 50}%`,
-        opacity: '0',
-        transition: 'opacity 0.5s, transform 2s'
-      },
-      finalOpacity: '1',
-      finalTransform: `translateY(${-Math.random() * 200}px)`,
-      delay: 500 + Math.random() * 1000
+  // Create power-up particles
+  for (let i = 0; i < 100; i++) {
+    const particle = document.createElement('div');
+    const size = Math.random() * 8 + 4;
+    const startX = Math.random() * 100;
+    const startDelay = Math.random() * 2000;
+    
+    Object.assign(particle.style, {
+      position: 'absolute',
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: '50%',
+      backgroundColor: `rgba(${Math.random() * 100}, ${150 + Math.random() * 105}, ${200 + Math.random() * 55}, 0.8)`,
+      boxShadow: '0 0 10px rgba(0, 255, 255, 0.8)',
+      left: `${startX}%`,
+      bottom: '-20px',
+      opacity: '0',
+      transform: 'translateY(0)',
+      transition: 'opacity 0.5s, transform 2s ease-out'
     });
-  }
 
-  // Create crystals
-  for (let i = 0; i < 30; i++) {
-    createParticle(dragonRoar, {
-      style: {
-        position: 'absolute',
-        width: `${Math.random() * 20 + 10}px`,
-        height: 'inherit',
-        backgroundColor: 'rgba(200, 240, 255, 0.6)',
-        boxShadow: '0 0 15px rgba(200, 240, 255, 0.8)',
-        left: `${Math.random() * 100}%`,
-        top: `${Math.random() * 50}%`,
-        clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-        opacity: '0',
-        transition: 'opacity 0.5s, transform 1s',
-        transform: 'scale(0) rotate(0deg)'
-      },
-      finalOpacity: '0.8',
-      finalTransform: `scale(1) rotate(${Math.random() * 360}deg)`,
-      delay: 200 + Math.random() * 800
-    });
+    dragonRoar.appendChild(particle);
+
+    // Animate particles
+    setTimeout(() => {
+      particle.style.opacity = '1';
+      particle.style.transform = `translateY(-${Math.random() * 400 + 200}px) translateX(${(Math.random() - 0.5) * 100}px)`;
+    }, startDelay);
   }
 
   // Add text elements
   const roarText = document.createElement('div');
-  roarText.innerHTML = 'ROAAAARRR!!! 🐉✨';
+  roarText.innerHTML = 'ROARRRRR!!! 🐉✨';
   Object.assign(roarText.style, {
     position: 'relative',
     zIndex: '10',
@@ -362,28 +363,42 @@ function activateEasterEgg() {
 
   // Add sound effects
   const sounds = {
-    roar: new Audio('https://freesound.org/data/previews/316/316068_5385832-lq.mp3'),
-    ice: new Audio('https://freesound.org/data/previews/411/411089_5121236-lq.mp3'),
-    water: new Audio('https://freesound.org/data/previews/275/275645_5379050-lq.mp3')
+    roar: new Audio('https://freesound.org/data/previews/566/566435_13123807-lq.mp3'),
+    thunder: new Audio('https://freesound.org/data/previews/102/102724_1721044-lq.mp3'),
+    powerUp: new Audio('https://freesound.org/data/previews/321/321104_5123851-lq.mp3')
   };
 
   document.body.appendChild(dragonRoar);
+  
+  // Show overlay with fade in
+  requestAnimationFrame(() => {
+    dragonRoar.style.opacity = '1';
+  });
 
   // Animation sequence
   const playSound = (sound) => {
     try { sound.play(); } catch(e) { console.log('Sound play failed:', e); }
   };
 
+  // Start vignette effect
   setTimeout(() => {
-    iceCrack.style.opacity = '1';
-    playSound(sounds.ice);
+    vignette.style.opacity = '1';
   }, 300);
 
+  // Start lightning effects
+  for (let i = 0; i < 8; i++) {
+    setTimeout(createLightning, 500 + i * 300);
+    if (i % 2 === 0) {
+      setTimeout(() => playSound(sounds.thunder), 500 + i * 300);
+    }
+  }
+
+  // Play power-up sound
   setTimeout(() => {
-    waterRipple.style.opacity = '1';
-    playSound(sounds.water);
+    playSound(sounds.powerUp);
   }, 800);
 
+  // Show text
   setTimeout(() => {
     roarText.style.opacity = '1';
     roarText.style.transform = 'scale(1)';
@@ -394,20 +409,72 @@ function activateEasterEgg() {
     descText.style.opacity = '1';
   }, 1800);
 
-  // Cleanup
+  // Cleanup with fade out
   setTimeout(() => {
-    document.body.removeChild(dragonRoar);
-  }, 5000);
+    dragonRoar.style.opacity = '0';
+    setTimeout(() => {
+      document.body.removeChild(dragonRoar);
+    }, 500);
+  }, 4500);
 }
 
-// Secret command
+// Secret commands and trivia
 let typedCommand = '';
+const dragonTrivia = [
+  "Lawless dapat mengendalikan es dan air sekaligus!",
+  "Sisik Lawless berkilau kebiruan di kegelapan",
+  "Lawless memiliki kemampuan bernafas di air dan darat",
+  "Sayap Lawless dihiasi kristal es yang tak pernah mencair",
+  "Lawless dapat mengubah suhu tubuhnya sesuai lingkungan",
+  "Taring Lawless sekuat berlian dan sedingin es",
+  "Lawless dapat melihat dalam gelap berkat warisan SeaWing",
+  "Ekor Lawless dapat memancarkan cahaya bioluminesen"
+];
+
+function showTrivia() {
+  const triviaOverlay = document.createElement('div');
+  const randomTrivia = dragonTrivia[Math.floor(Math.random() * dragonTrivia.length)];
+  
+  Object.assign(triviaOverlay.style, {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    background: 'rgba(0, 20, 40, 0.9)',
+    padding: '2rem',
+    borderRadius: '15px',
+    boxShadow: '0 0 30px rgba(0, 150, 255, 0.5)',
+    color: '#fff',
+    fontFamily: 'Orbitron, sans-serif',
+    fontSize: '1.5rem',
+    textAlign: 'center',
+    maxWidth: '80%',
+    zIndex: '9999',
+    opacity: '0',
+    transition: 'opacity 0.3s'
+  });
+  
+  triviaOverlay.textContent = randomTrivia;
+  document.body.appendChild(triviaOverlay);
+  
+  setTimeout(() => {
+    triviaOverlay.style.opacity = '1';
+  }, 100);
+  
+  setTimeout(() => {
+    triviaOverlay.style.opacity = '0';
+    setTimeout(() => document.body.removeChild(triviaOverlay), 300);
+  }, 3000);
+}
 
 document.addEventListener('keypress', (e) => {
   typedCommand += e.key.toLowerCase();
 
-  if (typedCommand.includes('roar')) {
+  if (typedCommand.includes('rawr')) {
     activateEasterEgg();
+    typedCommand = '';
+  } else if (typedCommand.includes('lawless')) {
+    showTrivia();
     typedCommand = '';
   }
 
