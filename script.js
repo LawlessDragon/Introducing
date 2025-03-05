@@ -22,6 +22,11 @@ const textToType = [
   "Siapkah kau menyelami kisahku?"
 ];
 
+// Start typing animation when page loads
+window.addEventListener('load', () => {
+  setTimeout(typeText, 500); // Start after a short delay
+});
+
 let textIndex = 0;
 let charIndex = 0;
 let isDeleting = false;
@@ -81,29 +86,91 @@ navLinks.forEach(link => {
   });
 });
 
-// Mobile Menu Functionality
-const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-const nav = document.querySelector('.nav');
+// Mobile menu functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+  const nav = document.querySelector('.nav');
+  
+  // Ensure mobile menu and navigation elements exist
+  if (!mobileMenuBtn || !nav) return;
 
-mobileMenuBtn.addEventListener('click', () => {
-  mobileMenuBtn.classList.toggle('active');
-  nav.classList.toggle('mobile-active');
-});
+  // Create overlay for mobile menu
+  const overlay = document.createElement('div');
+  overlay.className = 'mobile-menu-overlay';
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+  overlay.style.display = 'none';
+  overlay.style.zIndex = '998'; // below menu
+  document.body.appendChild(overlay);
 
-// Close menu when clicking outside
-document.addEventListener('click', (e) => {
-  if (!nav.contains(e.target) && !mobileMenuBtn.contains(e.target) && nav.classList.contains('mobile-active')) {
+  // Add base styles for mobile navigation
+  nav.style.position = 'fixed';
+  nav.style.top = '0';
+  nav.style.right = '-300px'; // hide off-screen
+  nav.style.width = '250px';
+  nav.style.height = '100%';
+  nav.style.backgroundColor = 'var(--dark)'; // use CSS variable
+  nav.style.transition = 'right 0.3s ease';
+  nav.style.zIndex = '999';
+  nav.style.padding = '20px';
+  nav.style.boxShadow = '0 0 10px rgba(0,0,0,0.1)';
+
+  // Toggle menu and overlay
+  mobileMenuBtn.addEventListener('click', function(event) {
+    event.stopPropagation();
+    
+    // Toggle active/inactive
+    const isMenuOpen = nav.style.right === '0px';
+    
+    if (isMenuOpen) {
+      // Close menu
+      nav.style.right = '-300px';
+      overlay.style.display = 'none';
+      mobileMenuBtn.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    } else {
+      // Open menu
+      nav.style.right = '0px';
+      overlay.style.display = 'block';
+      mobileMenuBtn.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  });
+
+  // Close menu when clicking overlay
+  overlay.addEventListener('click', function() {
+    nav.style.right = '-300px';
+    overlay.style.display = 'none';
     mobileMenuBtn.classList.remove('active');
-    nav.classList.remove('mobile-active');
-  }
-});
+    document.body.style.overflow = 'auto';
+  });
 
-// Close menu when clicking nav links
-const navLinks = document.querySelectorAll('.nav-link');
-navLinks.forEach(link => {
-  link.addEventListener('click', () => {
-    mobileMenuBtn.classList.remove('active');
-    nav.classList.remove('mobile-active');
+  // Close menu when clicking navigation links
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function() {
+      nav.style.right = '-300px';
+      overlay.style.display = 'none';
+      mobileMenuBtn.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    });
+  });
+
+  // Handle screen resize
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+      nav.style.right = 'auto';
+      nav.style.position = 'static';
+      overlay.style.display = 'none';
+      mobileMenuBtn.classList.remove('active');
+      document.body.style.overflow = 'auto';
+    } else {
+      nav.style.position = 'fixed';
+      nav.style.right = '-300px';
+    }
   });
 });
 
