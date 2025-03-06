@@ -70,10 +70,14 @@ main {
 
 section {
   min-height: 100vh;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   position: relative;
+}
+
+section.active {
+  display: flex;
 }
 
 /* Landing Page */
@@ -479,7 +483,12 @@ section {
   font-family: 'Orbitron', sans-serif;
   font-size: 2.5rem;
   text-align: center;
-  margin-bottom: 3rem;
+  margin: 0;
+  padding: 1rem 0;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   color: var(--primary);
   text-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
 }
@@ -670,156 +679,143 @@ section {
   opacity: 0;
 }
 
-/* Contact Page */
+/* Contact Section */
 .contact {
   padding: 5rem 2rem;
-  opacity: 0;
-  display: none;
+  text-align: center;
 }
 
 .contact-container {
-  max-width: 1000px;
+  max-width: 700px;
   margin: 0 auto;
-}
-
-.contact h2 {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 2.5rem;
-  text-align: center;
-  margin-bottom: 3rem;
-  color: var(--primary);
-  text-shadow: 0 0 10px rgba(0, 132, 255, 0.5);
-}
-
-.contact-form {
-  background: rgba(10, 20, 30, 0.7);
+  background: rgba(20, 40, 60, 0.9);
+  padding: 2.5rem;
   border-radius: 15px;
-  padding: 3rem;
-  margin-bottom: 3rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
 }
 
+/* Contact Title */
+.contact-container h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Contact Form */
+.contact-form {
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  background: rgba(30, 50, 70, 0.85);
+  backdrop-filter: none;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Efek saat kursor mengarah ke form */
+.contact-form:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+  transform: scale(1.02);
+}
+
+/* Form Group */
 .form-group {
-  margin-bottom: 2rem;
-  position: relative;
+  margin-bottom: 1.5rem;
 }
 
+/* Perbaikan Tampilan Input Fields */
 .form-input {
   width: 100%;
   padding: 1rem;
-  background: rgba(0, 20, 40, 0.6);
-  border: none;
-  border-bottom: 2px solid var(--primary);
+  border: 2px solid rgba(0, 255, 255, 0.5);
+  border-radius: 8px;
+  background: rgba(30, 50, 70, 0.9);
   color: white;
-  font-family: 'Montserrat', sans-serif;
   font-size: 1rem;
-  transition: all 0.3s;
-}
-
-.form-input:focus {
   outline: none;
-  border-bottom-color: var(--accent);
-  box-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
+  transition: all 0.3s ease-in-out;
 }
 
-.form-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+/* Efek saat input diklik atau kursor masuk */
+.form-input:focus {
+  border-color: rgba(0, 255, 255, 1);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.9);
+  background: rgba(60, 90, 120, 1); /* Lebih solid supaya tidak transparan */
+  backdrop-filter: blur(3px); /* Efek blur halus */
+  transform: scale(1.02);
+  transition: all 0.2s ease-in-out;
 }
 
-.form-label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  transition: all 0.3s;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.form-input:focus + .form-label,
-.form-input:not(:placeholder-shown) + .form-label {
-  transform: translateY(-20px);
-  font-size: 0.8rem;
-  color: var(--accent);
-}
-
-textarea.form-input {
-  min-height: 150px;
-  resize: vertical;
-}
-
+/* Submit Button */
 .submit-btn {
+  background: linear-gradient(135deg, #00ffff, #008cff);
   padding: 1rem 2rem;
-  font-family: 'Orbitron', sans-serif;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
   border: none;
   border-radius: 30px;
   font-size: 1.1rem;
   cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 5px 15px rgba(0, 132, 255, 0.3);
+  color: black;
+  font-weight: bold;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
 .submit-btn:hover {
-  background: linear-gradient(135deg, var(--accent), var(--primary));
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 132, 255, 0.5);
+  background: linear-gradient(135deg, #008cff, #00ffff);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
 }
 
+/* Social Media Links */
 .social-links {
+  margin-top: 2rem;
   display: flex;
   justify-content: center;
-  gap: 2rem;
-  margin-top: 3rem;
+  gap: 1rem;
 }
 
 .social-link {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  background: rgba(0, 132, 255, 0.3);
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
 }
 
+.social-link img {
+  width: 30px;
+}
+
+/* Efek hover icon sosial media */
 .social-link:hover {
-  transform: translateY(-5px) scale(1.1);
-  background: linear-gradient(135deg, var(--accent), var(--purple));
-  box-shadow: 0 10px 20px rgba(0, 132, 255, 0.5), 0 0 30px var(--accent);
+  transform: scale(1.2);
+  background: rgba(0, 255, 255, 0.5);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
 }
 
-.social-icon {
-  font-size: 1.5rem;
-  color: white;
+/* Popup Notification */
+.popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #00ffff;
+  color: black;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+  display: none;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
 }
 
-.qr-container {
-  margin-top: 4rem;
-  text-align: center;
-}
-
-.qr-code {
-  width: 200px;
-  height: 200px;
-  background: white;
-  padding: 1rem;
-  border-radius: 15px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-}
-
-.qr-code img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.popup.show {
+  display: block;
+  opacity: 1;
 }
 
 /* Navigation */
@@ -1060,23 +1056,15 @@ textarea.form-input {
   justify-content: space-between;
   cursor: pointer;
   z-index: 1000;
-  background-color: rgba(0, 20, 40, 0.9);
-  padding: 15px;
-  border-radius: 8px;
-  transition: all 0.3s;
-}
-
-.mobile-menu-btn:hover {
-  background-color: rgba(0, 20, 40, 1);
 }
 
 .mobile-menu-btn span {
   display: block;
   height: 3px;
   width: 100%;
-  background-color: var(--accent);
+  background-color: #fff;
   border-radius: 3px;
-  transition: transform 0.3s, opacity 0.3s;
+  transition: all 0.3s ease;
 }
 
 .mobile-menu-btn.active span:nth-child(1) {
@@ -1091,103 +1079,128 @@ textarea.form-input {
   transform: translateY(-11px) rotate(-45deg);
 }
 
+/* Media queries for responsive design */
 @media (max-width: 768px) {
-    .mobile-menu-btn {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      width: 30px;
-      height: 20px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      z-index: 1000;
-      position: relative;
-    }
-  
-    .mobile-menu-btn span {
-      width: 100%;
-      height: 3px;
-      background-color: var(--text-color, #ffffff);
-      transition: all 0.3s ease;
-      transform-origin: left center;
-    }
-  
-    .mobile-menu-btn.active span:nth-child(1) {
-      transform: rotate(45deg);
-    }
-  
-    .mobile-menu-btn.active span:nth-child(2) {
-      opacity: 0;
-    }
-  
-    .mobile-menu-btn.active span:nth-child(3) {
-      transform: rotate(-45deg);
-    }
-  
-    .nav {
-      position: fixed;
-      top: 0;
-      right: -100%;
-      width: 70%;
-      height: 100vh;
-      background: rgba(0, 10, 30, 0.95);
-      backdrop-filter: blur(15px);
-      flex-direction: column;
-      padding: 100px 20px 20px;
-      transition: right 0.3s ease-in-out;
-      z-index: 999;
-      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      overflow-y: auto;
-    }
-    
-    .nav.mobile-active {
-      right: 0;
-    }
-    
-    .nav-link {
-      margin: 15px 0;
-      font-size: 1.2rem;
-      text-align: center;
-      width: 100%;
-      padding: 15px;
-      border-radius: 8px;
-      background: rgba(0, 20, 40, 0.7);
-      transition: all 0.3s ease;
-      text-decoration: none;
-      color: var(--text-color, #ffffff);
-    }
-    
-    .nav-link:hover,
-    .nav-link.active {
-      background: rgba(0, 132, 255, 0.3);
-      transform: scale(1.05);
-    }
-  
-    /* Overlay untuk menu mobile */
-    .mobile-menu-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 998;
-      display: none;
-      backdrop-filter: blur(5px);
-    }
+  /* Show mobile menu button */
+  .mobile-menu-btn {
+    display: flex;
   }
   
-  /* Tambahan untuk membuat tombol hamburger lebih responsif */
-  @media (max-width: 768px) {
-    .mobile-menu-btn {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-    }
+  /* Navigation menu for mobile */
+  .nav {
+    display: none; /* Default: disembunyikan */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    text-align: center;
+    padding: 10px 0;
+    transition: transform 0.3s ease-in-out;
   }
+  
+  .nav.mobile-active {
+    display: block; /* Tampilkan saat aktif */
+  }
+  
+  .mobile-menu-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 1000;
+  }
+  
+  .mobile-menu-btn span {
+    display: block;
+    width: 30px;
+    height: 4px;
+    background: white;
+    margin: 5px;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .mobile-menu-btn.active span:nth-child(1) {
+    transform: translateY(9px) rotate(45deg);
+  }
+  
+  .mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .mobile-menu-btn.active span:nth-child(3) {
+    transform: translateY(-9px) rotate(-45deg);
+  }  
+  
+  .nav-link {
+    margin: 15px 0;
+    font-size: 1.2rem;
+  }
+  
+  /* Landing section */
+  .landing h1 {
+    font-size: 3rem;
+  }
+  
+  /* About section */
+  .about-container {
+    flex-direction: column;
+  }
+  
+  .avatar-container {
+    width: 80%;
+    margin: 0 auto 30px;
+  }
+  
+  /* Timeline adjustments */
+  .timeline {
+    padding: 0 10px;
+  }
+  
+  .timeline-item {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .timeline-left, .timeline-right {
+    left: 0;
+  }
+  
+  /* Fun facts */
+  .fun-facts {
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  /* Gallery */
+  .gallery-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Lore section */
+  .lore-map {
+    height: 200px;
+  }
+  
+  .lore-story {
+    padding: 15px;
+  }
+  
+  /* Contact form */
+  .contact-form {
+    width: 100%;
+  }
+  
+  .social-links {
+    justify-content: center;
+  }
+  
+  .qr-container {
+    width: 80%;
+    margin: 30px auto;
+  }
+}
 
 /* Small mobile devices */
 @media (max-width: 480px) {
@@ -1227,23 +1240,18 @@ body {
   justify-content: space-between;
   cursor: pointer;
   z-index: 1000;
-  background-color: rgba(0, 20, 40, 0.7);
-  padding: 15px;
-  border-radius: 8px;
-  transition: all 0.3s;
-}
-
-.mobile-menu-btn:hover {
-  background-color: rgba(0, 20, 40, 0.9);
+  background-color: rgba(0, 20, 40, 0.7); /* Semi-transparent background */
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .mobile-menu-btn span {
   display: block;
   height: 3px;
   width: 100%;
-  background-color: var(--accent);
+  background-color: #fff;
   border-radius: 3px;
-  transition: transform 0.3s, opacity 0.3s;
+  transition: all 0.3s ease;
 }
 
 .mobile-menu-btn.active span:nth-child(1) {
@@ -1271,9 +1279,8 @@ body {
     width: 70%;
     height: 100vh;
     background: rgba(0, 10, 30, 0.95);
-    backdrop-filter: blur(10px);
     flex-direction: column;
-    padding: 80px 20px;
+    padding-top: 80px;
     transition: right 0.3s ease;
     z-index: 999;
     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
@@ -1310,37 +1317,6 @@ body {
   }
   
 }
-.mobile-menu-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
-  z-index: 998;
-}
-
-.mobile-menu-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-@media (max-width: 768px) {
-  .nav {
-    background: rgba(0, 20, 40, 0.95);
-    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
-  }
-  
-  .nav-link {
-    background: rgba(10, 30, 60, 0.8);
-    border: 1px solid rgba(0, 132, 255, 0.2);
-  }
-}
-
 #bgCanvas {
   position: fixed;
   top: 0;
@@ -1352,7 +1328,23 @@ body {
 }
 
 html, body {
-  height: auto; /* Pastikan tidak mengunci tinggi */
-  overflow-x: hidden; /* Hindari horizontal scroll */
-  overflow-y: auto; /* Pastikan halaman bisa di-scroll */
+  overflow: hidden; /* Nonaktifkan scroll di seluruh halaman */
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  scrollbar-width: none; /* Hapus scrollbar di Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Hapus scrollbar di WebKit (Chrome, Safari) */
+}
+
+/* Izinkan scroll di semua halaman selain Landing Page */
+main:not(.landing) {
+  overflow-y: auto; /* Aktifkan scroll hanya untuk halaman selain Landing */
+  height: 100vh; /* Pastikan tinggi penuh */
 }
