@@ -22,40 +22,58 @@ const textToType = [
   "Siapkah kau menyelami kisahku?"
 ];
 
-// Start typing animation when page loads
-window.addEventListener('load', () => {
-  setTimeout(typeText, 500); // Start after a short delay
-});
-
 let textIndex = 0;
 let charIndex = 0;
 let isDeleting = false;
 let typingDelay = 100;
 
 function typeText() {
+  if (!typingText) return; // Ensure element exists
+  
+  // Set initial visibility
+  typingText.style.visibility = 'visible';
+  typingText.style.opacity = '1';
+  
   const currentText = textToType[textIndex];
 
   if (!isDeleting && charIndex <= currentText.length) {
     typingText.textContent = currentText.slice(0, charIndex);
+    typingText.style.color = '#fff'; // Set text color to white
     charIndex++;
-    setTimeout(typeText, typingDelay);
+    if (charIndex <= currentText.length) {
+      setTimeout(typeText, typingDelay);
+    } else {
+      // When text is fully typed, wait for 2 seconds before deleting
+      setTimeout(() => {
+        isDeleting = true;
+        typeText();
+      }, 2000);
+    }
   } else if (isDeleting && charIndex >= 0) {
     typingText.textContent = currentText.slice(0, charIndex);
     charIndex--;
-    setTimeout(typeText, typingDelay / 2);
-  } else {
-    isDeleting = !isDeleting;
-
-    if (!isDeleting) {
+    if (charIndex >= 0) {
+      setTimeout(typeText, typingDelay / 2);
+    } else {
+      isDeleting = false;
       textIndex = (textIndex + 1) % textToType.length;
+      charIndex = 0;
+      setTimeout(typeText, 500); // Short pause before starting next text
     }
-
-    setTimeout(typeText, isDeleting ? 1000 : 500);
   }
 }
 
+// Start typing animation when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  if (typingText) {
+    setTimeout(typeText, 1000); // Start after a 1-second delay
+    typingText.style.visibility = 'visible'; // Ensure text is visible
+  }
+});
+
 // Sections navigation
 const sections = ['landing', 'about', 'gallery', 'lore', 'contact'];
+const navLinks = document.querySelectorAll('.nav-link');
 
 navLinks.forEach(link => {
   link.addEventListener('click', (e) => {
@@ -90,142 +108,51 @@ navLinks.forEach(link => {
 document.addEventListener('DOMContentLoaded', function() {
   const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
   const nav = document.querySelector('.nav');
-  
-  // Ensure mobile menu and navigation elements exist
-  if (!mobileMenuBtn || !nav) return;
 
-  // Create overlay for mobile menu
-  const overlay = document.createElement('div');
-  overlay.className = 'mobile-menu-overlay';
-  overlay.style.position = 'fixed';
-  overlay.style.top = '0';
-  overlay.style.left = '0';
-  overlay.style.width = '100%';
-  overlay.style.height = '100%';
-  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-  overlay.style.display = 'none';
-  overlay.style.zIndex = '998'; // below menu
-  document.body.appendChild(overlay);
+  // Pastikan menu tertutup secara default
+  nav.classList.remove('mobile-active');
 
-  // Add base styles for mobile navigation
-  nav.style.position = 'fixed';
-  nav.style.top = '0';
-  nav.style.right = '-300px'; // hide off-screen
-  nav.style.width = '250px';
-  nav.style.height = '100%';
-  nav.style.backgroundColor = 'var(--dark)'; // use CSS variable
-  nav.style.transition = 'right 0.3s ease';
-  nav.style.zIndex = '999';
-  nav.style.padding = '20px';
-  nav.style.boxShadow = '0 0 10px rgba(0,0,0,0.1)';
-
-  // Toggle menu and overlay
-  mobileMenuBtn.addEventListener('click', function(event) {
-    event.stopPropagation();
-    
-    // Toggle active/inactive
-    const isMenuOpen = nav.style.right === '0px';
-    
-    if (isMenuOpen) {
-      // Close menu
-      nav.style.right = '-300px';
-      overlay.style.display = 'none';
-      mobileMenuBtn.classList.remove('active');
-      document.body.style.overflow = 'auto';
-    } else {
-      // Open menu
-      nav.style.right = '0px';
-      overlay.style.display = 'block';
-      mobileMenuBtn.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-  });
-
-  // Close menu when clicking overlay
-  overlay.addEventListener('click', function() {
-    nav.style.right = '-300px';
-    overlay.style.display = 'none';
-    mobileMenuBtn.classList.remove('active');
-    document.body.style.overflow = 'auto';
-  });
-
-  // Close menu when clicking navigation links
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', function() {
-      nav.style.right = '-300px';
-      overlay.style.display = 'none';
-      mobileMenuBtn.classList.remove('active');
-      document.body.style.overflow = 'auto';
-    });
-  });
-
-  // Handle screen resize
-  window.addEventListener('resize', function() {
-    if (window.innerWidth > 768) {
-      nav.style.right = 'auto';
-      nav.style.position = 'static';
-      overlay.style.display = 'none';
-      mobileMenuBtn.classList.remove('active');
-      document.body.style.overflow = 'auto';
-    } else {
-      nav.style.position = 'fixed';
-      nav.style.right = '-300px';
-    }
-  });
-});
-
-// Mobile menu functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-  const nav = document.querySelector('.nav');
-  const overlay = document.createElement('div');
-  
-  // Create overlay for mobile menu
-  overlay.className = 'mobile-menu-overlay';
-  document.body.appendChild(overlay);
-  
-  // Toggle menu and overlay
   mobileMenuBtn.addEventListener('click', function(event) {
     event.stopPropagation();
     this.classList.toggle('active');
     nav.classList.toggle('mobile-active');
-    overlay.classList.toggle('active');
-    document.body.style.overflow = nav.classList.contains('mobile-active') ? 'hidden' : 'auto';
   });
-  
-  // Close menu when clicking overlay
-  overlay.addEventListener('click', function() {
-    mobileMenuBtn.classList.remove('active');
-    nav.classList.remove('mobile-active');
-    overlay.classList.remove('active');
-    document.body.style.overflow = 'auto';
-  });
-  
-  // Close menu when clicking links
+
+  // Tutup menu jika link diklik (di mobile)
   document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', function() {
-      mobileMenuBtn.classList.remove('active');
-      nav.classList.remove('mobile-active');
-      overlay.classList.remove('active');
-      document.body.style.overflow = 'auto';
+      if (window.innerWidth < 768) {
+        mobileMenuBtn.classList.remove('active');
+        nav.classList.remove('mobile-active');
+      }
     });
   });
-  
-  // Handle resize events
-  window.addEventListener('resize', function() {
-    if (window.innerWidth > 768) {
+
+  // Tutup menu jika klik di luar
+  document.addEventListener('click', function(event) {
+    if (!nav.contains(event.target) && !mobileMenuBtn.contains(event.target)) {
       mobileMenuBtn.classList.remove('active');
       nav.classList.remove('mobile-active');
-      overlay.classList.remove('active');
-      document.body.style.overflow = 'auto';
     }
   });
-});
+  
+  // Prevent menu from blocking scrolling
+  // Remove scroll event listener
+  window.removeEventListener('scroll', function() {
+    if (window.innerWidth < 768 && nav.classList.contains('mobile-active')) {
+      window.scrollTo(0, 0);
+    }
+  });
 
-window.addEventListener('DOMContentLoaded', () => {
-  document.body.style.overflow = 'auto';
+  // Remove overflow style setting
+  window.addEventListener('DOMContentLoaded', () => {
+    window.scrollTo(0, 0);
+    document.documentElement.style.scrollBehavior = 'auto';
+    requestAnimationFrame(() => {
+      document.documentElement.style.scrollBehavior = '';
+    });
+  });
 });
-
 
 // Enter button click
 const enterButton = document.querySelector('.enter-btn');
@@ -336,6 +263,43 @@ function createParticle(container, config) {
   return particle;
 }
 
+function createPowerParticle(container) {
+  const particle = document.createElement('div');
+  const size = Math.random() * 10 + 5;
+  const startX = Math.random() * window.innerWidth;
+  
+  Object.assign(particle.style, {
+    position: 'absolute',
+    width: size + 'px',
+    height: size + 'px',
+    backgroundColor: `rgba(${Math.random() * 100}, ${150 + Math.random() * 105}, ${200 + Math.random() * 55}, 0.8)`,
+    borderRadius: '50%',
+    boxShadow: `
+      0 0 10px rgba(0, 255, 255, 0.8),
+      0 0 20px rgba(0, 255, 255, 0.6),
+      0 0 30px rgba(0, 255, 255, 0.4),
+      0 0 40px rgba(0, 200, 255, 0.2)
+    `,
+    filter: 'blur(1px)',
+    left: startX + 'px',
+    bottom: '-20px',
+    opacity: '0.8',
+    transition: 'transform 2s ease-out, opacity 2s ease-out',
+    zIndex: '10000'
+  });
+
+  container.appendChild(particle);
+
+  setTimeout(() => {
+    particle.style.transform = `translateY(-${Math.random() * 200 + 400}px) translateX(${(Math.random() - 0.5) * 100}px)`;
+    particle.style.opacity = '0';
+  }, 50);
+
+  setTimeout(() => {
+    container.removeChild(particle);
+  }, 2000);
+}
+
 function activateEasterEgg() {
   // Create overlay container
   const dragonRoar = document.createElement('div');
@@ -355,216 +319,102 @@ function activateEasterEgg() {
     color: 'var(--accent)',
     textShadow: '0 0 20px var(--accent)',
     flexDirection: 'column',
-    overflow: 'hidden',
-    opacity: '0',
-    transition: 'opacity 0.5s ease-in-out'
+    overflow: 'hidden'
   });
-
-  // Create enhanced blue vignette effect
-  const vignette = document.createElement('div');
-  Object.assign(vignette.style, {
-    position: 'absolute',
-    top: '0',
-    left: '0',
-    width: '100%',
-    height: '100%',
-    background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0, 150, 255, 0.05) 30%, rgba(0, 150, 255, 0.2) 60%, rgba(0, 150, 255, 0.4) 80%, rgba(0, 150, 255, 0.6) 100%)',
-    opacity: '0',
-    transition: 'opacity 0.5s',
-    pointerEvents: 'none'
-  });
-  dragonRoar.appendChild(vignette);
-
-  // Create lightning effects
-  const createLightning = () => {
-    const lightning = document.createElement('div');
-    const side = Math.random() < 0.5 ? 'left' : 'right';
-    const startY = Math.random() * 100;
-    
-    Object.assign(lightning.style, {
-      position: 'absolute',
-      [side]: '0',
-      top: `${startY}%`,
-      width: '150px',
-      height: '3px',
-      background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 50%, rgba(0,150,255,1) 100%)',
-      filter: 'blur(2px)',
-      opacity: '0',
-      transform: `rotate(${side === 'left' ? '20deg' : '-20deg'})`
-    });
-
-    dragonRoar.appendChild(lightning);
-
-    // Animate lightning
-    setTimeout(() => {
-      lightning.style.opacity = '1';
-      lightning.style.transition = 'opacity 0.1s';
-      setTimeout(() => {
-        lightning.style.opacity = '0';
-        setTimeout(() => dragonRoar.removeChild(lightning), 100);
-      }, 100);
-    }, Math.random() * 2000);
-  };
 
   // Create power-up particles
-  for (let i = 0; i < 100; i++) {
-    const particle = document.createElement('div');
-    const size = Math.random() * 8 + 4;
-    const startX = Math.random() * 100;
-    const startDelay = Math.random() * 2000;
-    
-    Object.assign(particle.style, {
+  const particleInterval = setInterval(() => {
+    createPowerParticle(dragonRoar);
+  }, 50);
+
+  // Create vignette effects on right, left and bottom sides
+  const vignettes = ['right', 'bottom', 'left'].map(side => {
+    const vignette = document.createElement('div');
+    Object.assign(vignette.style, {
       position: 'absolute',
-      width: `${size}px`,
-      height: `${size}px`,
-      borderRadius: '50%',
-      backgroundColor: `rgba(${Math.random() * 100}, ${150 + Math.random() * 105}, ${200 + Math.random() * 55}, 0.8)`,
-      boxShadow: '0 0 10px rgba(0, 255, 255, 0.8)',
-      left: `${startX}%`,
-      bottom: '-20px',
+      [side]: '0',
+      top: side === 'bottom' ? 'auto' : '0',
+      width: side === 'left' || side === 'right' ? '35%' : '100%',
+      height: side === 'bottom' ? '35%' : '100%',
+      background: `linear-gradient(${side === 'bottom' ? 'to top' : side === 'left' ? 'to right' : 'to left'}, 
+        rgba(0, 251, 255, 0.6) 0%,
+        rgba(0, 251, 255, 0.31) 20%,
+        rgba(0, 251, 255, 0.1) 40%,
+        transparent 100%
+      )`,
       opacity: '0',
-      transform: 'translateY(0)',
-      transition: 'opacity 0.5s, transform 2s ease-out'
+      transition: 'opacity 0.8s ease-in-out',
+      pointerEvents: 'none',
+      filter: 'blur(15px)'
     });
+    dragonRoar.appendChild(vignette);
+    return vignette;
+  });
 
-    dragonRoar.appendChild(particle);
+  // Create and play sound effect
+  const roarSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+  roarSound.volume = 0.3;
+  roarSound.play();
 
-    // Animate particles
-    setTimeout(() => {
-      particle.style.opacity = '1';
-      particle.style.transform = `translateY(-${Math.random() * 400 + 200}px) translateX(${(Math.random() - 0.5) * 100}px)`;
-    }, startDelay);
-  }
-
-  // Add text elements
+  // Add text elements with enhanced animation
   const roarText = document.createElement('div');
-  roarText.innerHTML = 'ROARRRRR!!! 🐉✨';
+  roarText.innerHTML = 'RAWRRRRR!!! 🐉✨';
   Object.assign(roarText.style, {
     position: 'relative',
     zIndex: '10',
     textShadow: '0 0 20px var(--accent), 0 0 40px var(--primary)',
     opacity: '0',
-    transform: 'scale(0.5)',
+    transform: 'scale(0.5) translateY(-50px)',
     transition: 'opacity 0.5s, transform 0.5s'
   });
 
-  const descText = document.createElement('div');
-  descText.innerHTML = 'Kekuatan IceWing & SeaWing telah aktif!';
-  Object.assign(descText.style, {
+  const powerText = document.createElement('div');
+  powerText.innerHTML = 'Kekuatan IceWing & SeaWing telah aktif!';
+  Object.assign(powerText.style, {
+    position: 'relative',
+    zIndex: '10',
     fontSize: '1.5rem',
     marginTop: '20px',
+    textShadow: '0 0 15px var(--accent)',
     opacity: '0',
-    transition: 'opacity 0.5s'
+    transform: 'translateY(20px)',
+    transition: 'opacity 0.5s, transform 0.5s'
   });
 
   dragonRoar.appendChild(roarText);
-  dragonRoar.appendChild(descText);
-
-  // Add sound effects
-  const sounds = {
-    roar: new Audio('https://freesound.org/data/previews/566/566435_13123807-lq.mp3'),
-    thunder: new Audio('https://freesound.org/data/previews/102/102724_1721044-lq.mp3'),
-    powerUp: new Audio('https://freesound.org/data/previews/321/321104_5123851-lq.mp3')
-  };
-
+  dragonRoar.appendChild(powerText);
   document.body.appendChild(dragonRoar);
-  
-  // Show overlay with fade in
-  requestAnimationFrame(() => {
-    dragonRoar.style.opacity = '1';
-  });
 
   // Animation sequence
-  const playSound = (sound) => {
-    try { sound.play(); } catch(e) { console.log('Sound play failed:', e); }
-  };
-
-  // Start vignette effect
   setTimeout(() => {
-    vignette.style.opacity = '1';
+    vignettes.forEach(v => v.style.opacity = '1');
   }, 300);
 
-  // Start lightning effects
-  for (let i = 0; i < 8; i++) {
-    setTimeout(createLightning, 500 + i * 300);
-    if (i % 2 === 0) {
-      setTimeout(() => playSound(sounds.thunder), 500 + i * 300);
-    }
-  }
-
-  // Play power-up sound
-  setTimeout(() => {
-    playSound(sounds.powerUp);
-  }, 800);
-
-  // Show text
   setTimeout(() => {
     roarText.style.opacity = '1';
-    roarText.style.transform = 'scale(1)';
-    playSound(sounds.roar);
-  }, 1200);
+    roarText.style.transform = 'scale(1) translateY(0)';
+  }, 800);
 
   setTimeout(() => {
-    descText.style.opacity = '1';
-  }, 1800);
+    powerText.style.opacity = '1';
+    powerText.style.transform = 'translateY(0)';
+  }, 1200);
 
   // Cleanup with fade out
   setTimeout(() => {
+    dragonRoar.style.transition = 'opacity 0.8s ease-out';
     dragonRoar.style.opacity = '0';
+    roarSound.pause();
+    roarSound.currentTime = 0;
     setTimeout(() => {
       document.body.removeChild(dragonRoar);
-    }, 500);
-  }, 4500);
+      clearInterval(particleInterval);
+    }, 800);
+  }, 4000);
 }
 
-// Secret commands and trivia
+// Secret commands
 let typedCommand = '';
-const dragonTrivia = [
-  "Lawless dapat mengendalikan es dan air sekaligus!",
-  "Sisik Lawless berkilau kebiruan di kegelapan",
-  "Lawless memiliki kemampuan bernafas di air dan darat",
-  "Sayap Lawless dihiasi kristal es yang tak pernah mencair",
-  "Lawless dapat mengubah suhu tubuhnya sesuai lingkungan",
-  "Taring Lawless sekuat berlian dan sedingin es",
-  "Lawless dapat melihat dalam gelap berkat warisan SeaWing",
-  "Ekor Lawless dapat memancarkan cahaya bioluminesen"
-];
-
-function showTrivia() {
-  const triviaOverlay = document.createElement('div');
-  const randomTrivia = dragonTrivia[Math.floor(Math.random() * dragonTrivia.length)];
-  
-  Object.assign(triviaOverlay.style, {
-    position: 'fixed',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    background: 'rgba(0, 20, 40, 0.9)',
-    padding: '2rem',
-    borderRadius: '15px',
-    boxShadow: '0 0 30px rgba(0, 150, 255, 0.5)',
-    color: '#fff',
-    fontFamily: 'Orbitron, sans-serif',
-    fontSize: '1.5rem',
-    textAlign: 'center',
-    maxWidth: '80%',
-    zIndex: '9999',
-    opacity: '0',
-    transition: 'opacity 0.3s'
-  });
-  
-  triviaOverlay.textContent = randomTrivia;
-  document.body.appendChild(triviaOverlay);
-  
-  setTimeout(() => {
-    triviaOverlay.style.opacity = '1';
-  }, 100);
-  
-  setTimeout(() => {
-    triviaOverlay.style.opacity = '0';
-    setTimeout(() => document.body.removeChild(triviaOverlay), 300);
-  }, 3000);
-}
 
 document.addEventListener('keypress', (e) => {
   typedCommand += e.key.toLowerCase();
@@ -582,6 +432,79 @@ document.addEventListener('keypress', (e) => {
     typedCommand = '';
   }, 2000);
 });
+
+function showTrivia() {
+  const triviaOverlay = document.createElement('div');
+  Object.assign(triviaOverlay.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: '9999',
+    fontFamily: 'Orbitron, sans-serif',
+    opacity: '0',
+    transition: 'opacity 0.5s'
+  });
+
+  const triviaList = [
+    "Lawless memiliki sisik yang berkilau seperti kristal es di bawah sinar matahari",
+    "Suhu tubuh Lawless bisa beradaptasi dengan lingkungan sekitarnya",
+    "Lawless bisa bernafas di air dan membekukan air di sekitarnya",
+    "Sayap Lawless memiliki corak unik yang menyerupai aurora",
+    "Lawless sangat menyukai seafood, terutama salmon"
+  ];
+
+  const randomTrivia = triviaList[Math.floor(Math.random() * triviaList.length)];
+  
+  const triviaContent = document.createElement('div');
+  Object.assign(triviaContent.style, {
+    textAlign: 'center',
+    color: 'var(--accent)',
+    padding: '2rem',
+    maxWidth: '600px',
+    transform: 'translateY(30px)',
+    transition: 'transform 0.5s'
+  });
+
+  const triviaTitle = document.createElement('div');
+  triviaTitle.textContent = 'Tahukah kamu?';
+  Object.assign(triviaTitle.style, {
+    fontSize: '2rem',
+    marginBottom: '1rem',
+    textShadow: '0 0 15px var(--accent)'
+  });
+
+  const triviaText = document.createElement('div');
+  triviaText.textContent = randomTrivia;
+  Object.assign(triviaText.style, {
+    fontSize: '1.2rem',
+    lineHeight: '1.6',
+    textShadow: '0 0 10px var(--primary)'
+  });
+
+  triviaContent.appendChild(triviaTitle);
+  triviaContent.appendChild(triviaText);
+  triviaOverlay.appendChild(triviaContent);
+  document.body.appendChild(triviaOverlay);
+
+  // Animation sequence
+  requestAnimationFrame(() => {
+    triviaOverlay.style.opacity = '1';
+    triviaContent.style.transform = 'translateY(0)';
+  });
+
+  // Cleanup
+  setTimeout(() => {
+    triviaOverlay.style.opacity = '0';
+    triviaContent.style.transform = 'translateY(30px)';
+    setTimeout(() => document.body.removeChild(triviaOverlay), 500);
+  }, 4000);
+}
 
 // Gallery day/night mode toggle
 function setupGalleryModeToggle() {
@@ -695,7 +618,7 @@ window.addEventListener('load', () => {
   gsap.to('.nav', { opacity: 1, y: 0, duration: 1, delay: 0.5 });
 
   // Animate landing page elements
-  gsap.fromTo('.landing h1', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 1 });
+  gsap.fromTo('.landing h1', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.8 });
   gsap.fromTo('.typing-container', { opacity: 0 }, { opacity: 1, duration: 1, delay: 0.5 });
   gsap.fromTo('.enter-btn', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1, delay: 1.5 });
 
