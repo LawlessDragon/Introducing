@@ -12,23 +12,35 @@ function initMobileEasterEggs() {
     
     // Variables for long press detection
     let pressTimer;
-    const longPressTime = 2000; // milliseconds to hold for long press
+    const longPressTime = 1000; // milliseconds to hold for long press
     
-    // 1. Double tap anywhere on screen for RAWR Easter egg
+        // Variables for triple tap detection
+    let tapCount = 0;
+    let lastTapTime = 0;
+    const tapDelay = 500; // milliseconds between taps
+    
+    // 1. Triple tap anywhere for RAWR Easter egg
     document.addEventListener('touchend', (e) => {
         const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTap;
-        
-        if (tapLength < doubleTapDelay && tapLength > 0) {
-            // Double tap detected
-            e.preventDefault();
-            activateRawrEasterEgg();
+        if (currentTime - lastTapTime > tapDelay) {
+            // Reset tap count if too much time has passed
+            tapCount = 1;
+        } else {
+            tapCount++;
         }
         
-        lastTap = currentTime;
+        lastTapTime = currentTime;
+        
+        if (tapCount === 3) {
+            // Triple tap detected
+            console.log('Triple tap detected! Activating RAWR Easter egg');
+            e.preventDefault();
+            activateRawrEasterEgg();
+            tapCount = 0; // Reset tap count
+        }
     });
     
-    // 2. Long press on hamburger menu for VORE Easter egg (SWAPPED)
+    // 3. Long press on hamburger menu for VORE Easter egg (kept as is)
     const hamburgerMenu = document.querySelector('.hamburger');
     if (hamburgerMenu) {
         // Touch start - start the timer
@@ -48,32 +60,6 @@ function initMobileEasterEggs() {
             });
         });
     }
-    
-    // Set up long press detection for LAWLESS Easter egg
-    document.addEventListener('touchstart', (e) => {
-        // Don't trigger if we're pressing on the hamburger menu (to avoid double triggers)
-        if (e.target.closest('.hamburger')) {
-            return;
-        }
-        
-        console.log('Touch start detected for LAWLESS Easter egg');
-        pressTimer = setTimeout(() => {
-            console.log('Long press detected! Activating LAWLESS Easter egg');
-            activateLawlessEasterEgg();
-        }, longPressTime);
-    });
-    
-    // Clear the timer if the touch ends or moves
-    ['touchend', 'touchcancel', 'touchmove'].forEach(evt => {
-        document.addEventListener(evt, (e) => {
-            // Don't clear if we're on the hamburger menu (to avoid interfering with hamburger menu long press)
-            if (e.target.closest('.hamburger')) {
-                return;
-            }
-            console.log('Touch ended or moved, clearing LAWLESS timer');
-            clearTimeout(pressTimer);
-        });
-    });
     
     // 4. Long press anywhere on lore page for VORE Easter egg (kept for backward compatibility)
     // Check if we're on the lore page
@@ -212,56 +198,7 @@ function activateRawrEasterEgg() {
     }
 }
 
-// Function to activate LAWLESS Easter egg (reusing existing function from script.js)
-function activateLawlessEasterEgg() {
-    // Check if the function exists in the global scope
-    if (typeof showTrivia === 'function') {
-        showTrivia();
-    } else {
-        console.warn('LAWLESS Easter egg function not found');
-        // Fallback implementation if the original function is not available
-        const triviaList = [
-            "Lawless memiliki sisik yang berkilau seperti kristal es di bawah sinar matahari",
-            "Suhu tubuh Lawless bisa beradaptasi dengan lingkungan sekitarnya",
-            "Lawless bisa bernafas di air dan membekukan air di sekitarnya",
-            "Sayap Lawless memiliki corak unik yang menyerupai aurora",
-            "Lawless sangat menyukai seafood, terutama salmon"
-        ];
-        
-        const randomTrivia = triviaList[Math.floor(Math.random() * triviaList.length)];
-        
-        const overlay = document.createElement('div');
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100%';
-        overlay.style.height = '100%';
-        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-        overlay.style.display = 'flex';
-        overlay.style.alignItems = 'center';
-        overlay.style.justifyContent = 'center';
-        overlay.style.zIndex = '9999';
-        overlay.style.color = '#00fbff';
-        overlay.style.fontFamily = 'Orbitron, sans-serif';
-        overlay.style.padding = '2rem';
-        overlay.style.textAlign = 'center';
-        
-        const content = document.createElement('div');
-        content.innerHTML = `<div style="font-size: 2rem; margin-bottom: 1rem; text-shadow: 0 0 15px #00fbff">Tahukah kamu?</div>
-                           <div style="font-size: 1.2rem; line-height: 1.6; text-shadow: 0 0 10px #0088ff">${randomTrivia}</div>`;
-        
-        overlay.appendChild(content);
-        document.body.appendChild(overlay);
-        
-        setTimeout(() => {
-            overlay.style.opacity = '0';
-            overlay.style.transition = 'opacity 0.8s';
-            setTimeout(() => {
-                document.body.removeChild(overlay);
-            }, 800);
-        }, 4000);
-    }
-}
+// Removed trivia Easter egg function
 
 // Function to activate VORE Easter egg (using the existing voreEasterEgg object)
 function activateVoreEasterEgg() {
