@@ -12,7 +12,7 @@ function initMobileEasterEggs() {
     
     // Variables for long press detection
     let pressTimer;
-    const longPressTime = 2500; // milliseconds to hold for long press
+    const longPressTime = 2000; // milliseconds to hold for long press
     
     // 1. Double tap anywhere on screen for RAWR Easter egg
     document.addEventListener('touchend', (e) => {
