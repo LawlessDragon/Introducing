@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lawless | Blue Dragon</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="script.js" defer></script>
+  <script src="audio.js" defer></script>
+  <script src="story-game.js" defer></script>
+  <script src="vore-easter-egg.js" defer></script>
+  <script src="mobile-easter-eggs.js" defer></script>
+</head>
+<!-- Add this right after the opening body tag -->
+<body>
+  <div class="custom-cursor"></div>
+  <canvas id="bgCanvas"></canvas>
+  
+    <main>
+    <section id="landing" class="landing">
+      <h1>LAWLESS</h1>
+      <div class="typing-container">
+        <p id="typing-text"></p>
+      </div>
+      <button class="enter-btn">ENTER</button>
+    </section>
+
+    <section id="about" class="about">
+      <div class="about-container">
+        <div class="avatar-container">
+          <img src="https://i.ibb.co.com/YT0JZW6Z/IMG-20241129-154137.jpg" alt="IMG-20241129-154137" alt="Lawless Blue Dragon" class="avatar">
+          <div class="avatar-overlay">
+            <h3>Lawless</h3>
+            <p>IceWing & SeaWing Hybrid</p>
+          </div>
+          <div class="bioluminescent-dots">
+            <!-- Bioluminescent dots will be added via JavaScript -->
+          </div>
+        </div>
+
+        <div class="about-content">
+          <h2>About Me</h2>
+        
+          <div class="chat-container">
+            <!-- Sisi Fiksi -->
+            <div class="chat-bubble">
+              Aku Lawless, seekor naga hibrida IceWing-SeaWing dari dunia Pyrrhia. Sisikku berwarna biru es dengan aksen bioluminesensi yang bersinar dalam gelap. Aku memiliki napas es dari IceWing dan kemampuan bernafas di bawah air dari SeaWing.
+            </div>
+        
+            <!-- Perpaduan Fiksi & Real Life -->
+            <div class="chat-bubble">
+              Aku tumbuh di sanctuary rahasia di perbatasan Kerajaan Es dan Kerajaan Laut, tempat dua elemen bertemu. Di dunia nyata, aku mulai masuk fandom furry sejak 2021, terinspirasi dari *How to Train Your Dragon* dan kecintaanku pada karakter naga.
+            </div>
+        
+            <!-- Kehidupan Real Life & Hobi -->
+            <div class="chat-bubble">
+              Dalam kehidupan sehari-hari, aku suka fotografi, mengeksplorasi dunia digital, dan tertarik dengan teknologi. Aku sering mengabadikan momen menarik melalui kamera, terutama pemandangan alam dan elemen visual yang unik. Selain itu, aku juga menikmati bermain game dan mendengarkan musik sebagai cara untuk bersantai.
+            </div>     
+          </div> 
+          
+          <div class="timeline">
+            <div class="timeline-item timeline-left">
+                <div class="timeline-content">
+                    <div class="timeline-date">2019</div>
+                    <h3>Awal Ketertarikan</h3>
+                    <p>Mulai tertarik dengan *How to Train Your Dragon* dan series game-nya, membuka jalan menuju dunia naga.</p>
+                </div>
+            </div>
+        
+            <div class="timeline-item timeline-right">
+                <div class="timeline-content">
+                    <div class="timeline-date">2020</div>
+                    <h3>Mengenal Fandom</h3>
+                    <p>Membuat OC naga pertama bernama Hyde dan mulai melirik sedikit tentang fandom furry.</p>
+                </div>
+            </div>
+        
+            <div class="timeline-item timeline-left">
+                <div class="timeline-content">
+                    <div class="timeline-date">2023</div>
+                    <h3>Debut & Lawless</h3>
+                    <p>Debut fursuit di pawai Bandung dan memiliki OC naga biru bernama Lawless.</p>
+                </div>
+            </div>
+        
+            <div class="timeline-item timeline-right">
+                <div class="timeline-content">
+                    <div class="timeline-date">Sekarang</div>
+                    <h3>Railfurs & Fandom</h3>
+                    <p>Meneruskan hobi di fandom furry dan menjadi railfurs, menggabungkan kecintaan pada dunia furry dan kereta api.</p>
+                </div>
+            </div>
+        </div>        
+
+          <div class="fun-facts">
+            <div class="fact-card">
+              <div class="fact-card-inner">
+                <div class="fact-front">
+                  <p>Makanan Favorit?</p>
+                </div>
+                <div class="fact-back">
+                  <p>Mie instant and fried chicken</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="fact-card">
+              <div class="fact-card-inner">
+                <div class="fact-front">
+                  <p>Kemampuan Spesial?</p>
+                </div>
+                <div class="fact-back">
+                  <p>Manipulasi energi biru dan teleportasi antar dimensi digital!</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="fact-card">
+              <div class="fact-card-inner">
+                <div class="fact-front">
+                  <p>Hobi Tersembunyi?</p>
+                </div>
+                <div class="fact-back">
+                  <p>Mengoleksi kristal biru langka dari berbagai dunia paralel.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="fact-card">
+              <div class="fact-card-inner">
+                <div class="fact-front">
+                  <p>Takut Terhadap?</p>
+                </div>
+                <div class="fact-back">
+                  <p>Serangga pengganggu</p>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery" class="gallery">
+    <h2>Galeri Lawless</h2>
+
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <img src="https://i.ibb.co.com/JRWD84zR/image.png" alt="Lawless Adventure" class="gallery-img">
+        <div class="gallery-overlay">
+          <h3>Petualangan di Hutan Kristal</h3>
+          <p>Eksplorasi pertama Lawless menemukan kristal biru legendaris.</p>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="https://i.ibb.co.com/1GnwxnX9/image.png" alt="Lawless Flying" class="gallery-img">
+        <div class="gallery-overlay">
+          <h3>Terbang Menembus Awan</h3>
+          <p>Momen bebas di langit tanpa batas.</p>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="https://i.ibb.co.com/gZXbfp9p/1740926680018.jpg" alt="Lawless Magic" class="gallery-img">
+        <div class="gallery-overlay">
+          <h3>Kekuatan Elemental</h3>
+          <p>Mengendalikan elemen air dan es dengan energi biru.</p>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="https://i.ibb.co.com/p68vVzzX/image.png" alt="Lawless Portrait" class="gallery-img">
+        <div class="gallery-overlay">
+          <h3>Potret Royal</h3>
+          <p>Sisi anggun dari sang naga biru.</p>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="https://i.ibb.co.com/S4fzxX9k/image.png" alt="Lawless Friend" class="gallery-img">
+        <div class="gallery-overlay">
+          <h3>Persahabatan Antar Dunia</h3>
+          <p>Bertemu teman-teman dari dimensi lain.</p>
+        </div>
+      </div>
+
+      <div class="gallery-item">
+        <img src="https://i.ibb.co.com/GvxDXdhS/1740926839855.jpg" alt="Lawless Night" class="gallery-img">
+        <div class="gallery-overlay">
+          <h3>Malam di Sanctuary</h3>
+          <p>Momen tenang di bawah langit penuh bintang.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="lore" class="lore">
+    <div class="lore-container">
+      <!-- Story game will be initialized here by JavaScript -->
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="contact-container">
+      <div class="contact-header">
+        <div class="dragon-icon"><i class="fa fa-dragon"></i></div>
+        <h2>Hubungi Lawless</h2>
+        <p class="contact-subtitle">Kirim pesan untuk berteman atau berkolaborasi</p>
+      </div>
+      
+      <form action="https://formspree.io/f/mdkennpz" method="POST" class="contact-form">
+        <div class="input-container">
+            <input type="text" class="form-input" name="name" id="name" required placeholder="">
+            <label for="name">Nama Kamu</label>
+            <div class="input-icon"><i class="fa fa-user"></i></div>
+        </div>
+    
+        <div class="input-container">
+            <input type="email" class="form-input" name="email" id="email" required placeholder="">
+            <label for="email">Email</label>
+            <div class="input-icon"><i class="fa fa-envelope"></i></div>
+        </div>
+    
+        <div class="input-container">
+            <textarea class="form-input" name="message" id="message" rows="4" required placeholder=""></textarea>
+            <label for="message">Pesan untuk Lawless</label>
+            <div class="input-icon message-icon"><i class="fa fa-comment"></i></div>
+        </div>
+    
+        <button type="submit" class="send-button">
+          <span>Kirim Pesan</span>
+          <i class="fa fa-paper-plane"></i>
+        </button>
+      </form>    
+      
+      <div class="social-links">
+        <h3 class="social-title">Atau temukan saya di</h3>
+        <a href="https://www.facebook.com/ilham.farhansyah.792" class="social-link" target="_blank">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook">
+        </a>
+        <a href="https://x.com/BlueLawless" class="social-link" target="_blank">
+          <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter">
+        </a>
+        <a href="https://www.instagram.com/lawless_derg" class="social-link" target="_blank">
+          <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram">
+        </a>
+        <a href="https://t.me/BlueLawless" class="social-link" target="_blank">
+          <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram">
+        </a>
+      </div>
+    </div>
+  </section>
+  <!-- Popup Notifikasi -->
+  <div id="success-popup" class="popup">
+    <p>Terima kasih telah menghubungi kami :33</p>
+</div>
+<div id="overlay"></div>
+  </div>
+  </section>
+  </main>
+
+  <nav class="nav">
+  <a href="#landing" class="nav-link active">Home</a>
+  <a href="#about" class="nav-link">About</a>
+  <a href="#gallery" class="nav-link">Gallery</a>
+  <a href="#lore" class="nav-link">Lore</a>
+  <a href="#contact" class="nav-link">Contact</a>
+  </nav>
+
+  <nav>
+    <button class="hamburger">☰</button>
+    <ul class="menu">
+      <li><a href="#landing" class="nav-link active">Home</a></li>
+      <li><a href="#about" class="nav-link">About</a></li>
+      <li><a href="#gallery" class="nav-link">Gallery</a></li>
+      <li><a href="#lore" class="nav-link">Lore</a></li>
+      <li><a href="#contact" class="nav-link">Contact</a></li>
+    </ul>
+  </nav>  
+
+<input type="text" class="form-input" name="name" id="name" required placeholder="">
+<input type="email" class="form-input" name="email" id="email" required placeholder="">
+<textarea class="form-input" name="message" id="message" rows="4" required placeholder=""></textarea>
+
+  <script src="three-bg.js"></script>
+</body>
+</html>
