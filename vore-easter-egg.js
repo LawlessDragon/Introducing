@@ -3617,26 +3617,89 @@ const voreEasterEgg = {
       },
       
       // Ending scenes
+      'complete_unity': {
+        character: 'Lawless',
+        text: function() {
+          return `${this.playerName}, kita telah mencapai tingkat koneksi yang jarang terjadi. Aku bisa merasakan jiwamu bersatu dengan jiwaku.`;
+        },
+        choices: [
+          { id: 'reflect_journey', text: 'Merenungkan perjalanan ini', nextScene: 'final_reflection' },
+          { id: 'embrace_unity', text: 'Merangkul kesatuan ini sepenuhnya', nextScene: 'unity_celebration' }
+        ],
+        effect: () => {
+          this.playSound('heartbeat');
+          this.changeBackgroundMusic('intense');
+        }
+      },
+      
+      'balanced_connection': {
+        character: 'Lawless',
+        text: function() {
+          return `Keseimbangan yang bijaksana, ${this.playerName}. Kita bisa terhubung tanpa kehilangan diri kita masing-masing.`;
+        },
+        choices: [
+          { id: 'reflect_journey', text: 'Merenungkan perjalanan ini', nextScene: 'final_reflection' },
+          { id: 'continue_adventure', text: 'Melanjutkan petualangan bersama', nextScene: 'future_adventures' }
+        ],
+        effect: () => {
+          this.playSound('heartbeat');
+        }
+      },
+      
+      'unity_celebration': {
+        character: 'Lawless',
+        text: function() {
+          return `Kesatuan kita adalah sesuatu yang patut dirayakan, ${this.playerName}. Bersama, kita akan mengalami petualangan yang tak terbayangkan.`;
+        },
+        choices: [
+          { id: 'reflect_journey', text: 'Merenungkan perjalanan sebelum melanjutkan', nextScene: 'final_reflection' }
+        ],
+        effect: () => {
+          this.changeBackgroundMusic('playful');
+        }
+      },
+      
       'final_reflection': {
-        text: 'Kau merenungkan semua pengalaman yang telah kau lalui. Setiap pilihan yang kau buat membentuk dirimu menjadi lebih kuat dan bijaksana.',
+        character: 'Lawless',
+        text: function() {
+          return `${this.playerName}, kau merenungkan semua pengalaman yang telah kau lalui. Setiap pilihan yang kau buat membentuk dirimu menjadi lebih kuat dan bijaksana.`;
+        },
         choices: [
           { id: 'reflect_on_choices', text: 'Aku merasa puas dengan semua ini.', nextScene: 'satisfied_ending' },
           { id: 'learn_from_mistakes', text: 'Aku merasa menyesal dengan beberapa pilihan.', nextScene: 'regret_ending' }
-        ]
+        ],
+        effect: () => {
+          this.playSound('heartbeat');
+          this.showBellyEnvironment(2);
+        }
       },
       
       'satisfied_ending': {
-        text: 'Kau tersenyum, merasakan kedamaian dalam pilihanmu. Semua pengalaman ini membentuk dirimu menjadi lebih kuat.',
+        character: 'Lawless',
+        text: function() {
+          return `${this.playerName} tersenyum, merasakan kedamaian dalam pilihanmu. Semua pengalaman ini membentuk dirimu menjadi lebih kuat. Aku senang kau tidak menyesali waktu kita bersama.`;
+        },
         choices: [
           { id: 'end', text: 'Selesai', nextScene: 'exit' }
-        ]
+        ],
+        effect: () => {
+          this.playSound('exit');
+          setTimeout(() => this.exitRoleplay(), 4000);
+        }
       },
       
       'regret_ending': {
-        text: 'Kau merenungkan pilihanmu, belajar dari kesalahan yang telah dibuat. Ini adalah bagian dari perjalananmu.',
+        character: 'Lawless',
+        text: function() {
+          return `${this.playerName} merenungkan pilihanmu, belajar dari kesalahan yang telah dibuat. Ini adalah bagian dari perjalananmu. Bahkan penyesalan memiliki nilai pembelajaran tersendiri.`;
+        },
         choices: [
           { id: 'end', text: 'Selesai', nextScene: 'exit' }
-        ]
+        ],
+        effect: () => {
+          this.playSound('exit');
+          setTimeout(() => this.exitRoleplay(), 4000);
+        }
       }
     };
   
