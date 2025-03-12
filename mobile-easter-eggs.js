@@ -105,19 +105,23 @@ function initMobileEasterEggs() {
     window.addEventListener('hashchange', checkAndSetupLorePageListeners);
 }
 
-// Function to activate RAWR Easter egg (reusing existing function from script.js)
 function activateRawrEasterEgg() {
     // Check if the function exists in the global scope
     if (typeof activateEasterEgg === 'function') {
         activateEasterEgg();
     } else {
         console.warn('RAWR Easter egg function not found');
-        // Fallback implementation if the original function is not available
+        
+        // Play sound
         const roarSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         roarSound.volume = 0.3;
         roarSound.play();
         
-        // Create a simple visual effect - mobile optimized
+        // Konstanta untuk warna dan font
+        const textColor = '#00fbff';
+        const fontFamily = 'Orbitron, sans-serif';
+        
+        // Membuat overlay - pengaturan dasar
         const overlay = document.createElement('div');
         overlay.style.position = 'fixed';
         overlay.style.top = '0';
@@ -125,79 +129,150 @@ function activateRawrEasterEgg() {
         overlay.style.width = '100%';
         overlay.style.height = '100%';
         overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-        overlay.style.display = 'flex';
-        overlay.style.alignItems = 'center';
-        overlay.style.justifyContent = 'center';
         overlay.style.zIndex = '9999';
-        overlay.style.color = '#00fbff';
-        overlay.style.textAlign = 'center'; // Ensure text is centered
+        overlay.style.boxSizing = 'border-box';
         
-        // Improved responsive font sizing for different device widths
-        if (window.innerWidth <= 320) {
-            // Extra small devices
-            overlay.style.fontSize = '0.9rem';
-            overlay.style.padding = '0.6rem';
-        } else if (window.innerWidth <= 480) {
-            // Small mobile devices
-            overlay.style.fontSize = '1.1rem';
-            overlay.style.padding = '0.7rem';
-        } else if (window.innerWidth <= 768) {
-            // Regular mobile devices
-            overlay.style.fontSize = '1.4rem';
-            overlay.style.padding = '0.8rem';
-        } else {
-            // Tablets and larger
-            overlay.style.fontSize = '2.2rem';
-            overlay.style.padding = '0';
-        }
+        // Menggunakan grid layout untuk perataan sempurna
+        const contentGrid = document.createElement('div');
+        contentGrid.style.position = 'absolute';
+        contentGrid.style.width = '100%';
+        contentGrid.style.height = '100%';
+        contentGrid.style.display = 'grid';
+        contentGrid.style.placeItems = 'center'; // Shorthand untuk align-items & justify-items
+        contentGrid.style.boxSizing = 'border-box';
         
-        overlay.style.fontFamily = 'Orbitron, sans-serif';
-        overlay.style.textShadow = '0 0 10px #00fbff';
-        overlay.style.textAlign = 'center';
-        overlay.style.maxWidth = '100%';
-        overlay.style.wordWrap = 'break-word';
-        overlay.style.flexDirection = 'column';
-        overlay.style.padding = '1rem';
+        // Container utama untuk konten - akan selalu ditengah secara sempurna
+        const contentContainer = document.createElement('div');
+        contentContainer.style.display = 'flex';
+        contentContainer.style.flexDirection = 'column';
+        contentContainer.style.alignItems = 'center';
+        contentContainer.style.justifyContent = 'center';
+        contentContainer.style.width = '100%';
+        contentContainer.style.maxWidth = '100%';
+        contentContainer.style.boxSizing = 'border-box';
+        contentContainer.style.padding = '0 20px'; // Tambah padding horizontal untuk mode portrait
+        contentContainer.style.textAlign = 'center';
         
-        const dragonEmoji = document.createElement('div');
-        dragonEmoji.textContent = '🐉✨';
-        dragonEmoji.style.fontSize = '1.5em';
-        dragonEmoji.style.marginBottom = '0.5rem';
-        dragonEmoji.style.textAlign = 'center';
-        dragonEmoji.style.width = '100%';
+        // LAWLESS text
+        const lawlessText = document.createElement('div');
+        lawlessText.textContent = 'LAWLESS';
+        lawlessText.style.color = textColor;
+        lawlessText.style.fontFamily = fontFamily;
+        lawlessText.style.fontSize = 'clamp(1.5rem, 5vw, 2.5rem)'; // Responsive font size
+        lawlessText.style.textShadow = `0 0 10px ${textColor}`;
+        lawlessText.style.textAlign = 'center';
+        lawlessText.style.width = '100%';
+        lawlessText.style.boxSizing = 'border-box';
+        lawlessText.style.margin = '0 0 10px 0';
         
+        // RAWR text - penting untuk tetap ditengah
         const rawrText = document.createElement('div');
-        rawrText.textContent = 'RAWRRRRR!!!';
-        rawrText.style.letterSpacing = '1px';
+        rawrText.textContent = 'RAWRRRR!!!';
+        rawrText.style.color = textColor;
+        rawrText.style.fontFamily = fontFamily;
+        rawrText.style.fontSize = 'clamp(2rem, 8vw, 3.5rem)'; // Responsive font size
+        rawrText.style.textShadow = `0 0 10px ${textColor}`;
+        rawrText.style.letterSpacing = '2px';
         rawrText.style.textAlign = 'center';
         rawrText.style.width = '100%';
+        rawrText.style.boxSizing = 'border-box';
+        rawrText.style.margin = '0 0 15px 0';
         
+        // Naga dan bintang container
+        const emojiContainer = document.createElement('div');
+        emojiContainer.style.width = '100%';
+        emojiContainer.style.textAlign = 'center';
+        emojiContainer.style.margin = '0 0 15px 0';
+        emojiContainer.style.boxSizing = 'border-box';
+        
+        // Naga dan bintang dengan display block
+        const emoji = document.createElement('div');
+        emoji.style.display = 'inline-block'; // Pastikan elemen inline block
+        emoji.style.fontSize = 'clamp(1.8rem, 6vw, 2.5rem)'; // Responsive font size
+        emoji.style.textAlign = 'center';
+        emoji.innerHTML = '🐉 ✨'; // Space diantara emoji
+        emojiContainer.appendChild(emoji);
+        
+        // Tercipta dari es abadi
         const subText = document.createElement('div');
         subText.textContent = 'Tercipta dari es abadi';
-        subText.style.fontSize = '0.7em';
-        subText.style.marginTop = '0.5rem';
+        subText.style.color = textColor;
+        subText.style.fontFamily = fontFamily;
+        subText.style.fontSize = 'clamp(0.8rem, 3vw, 1.2rem)'; // Responsive font size
         subText.style.opacity = '0.8';
+        subText.style.textShadow = `0 0 10px ${textColor}`;
         subText.style.textAlign = 'center';
         subText.style.width = '100%';
+        subText.style.boxSizing = 'border-box';
+        subText.style.margin = '0 0 20px 0';
         
+        // Kekuatan container - key untuk mode portrait
+        const powerContainer = document.createElement('div');
+        powerContainer.style.width = '100%';
+        powerContainer.style.textAlign = 'center';
+        powerContainer.style.boxSizing = 'border-box';
+        
+        // Box untuk kekuatan text
+        const powerBox = document.createElement('div');
+        powerBox.style.display = 'inline-block'; // Penting untuk pemusatan
+        powerBox.style.boxSizing = 'border-box';
+        powerBox.style.padding = '10px 20px';
+        powerBox.style.border = `1px solid ${textColor}`;
+        powerBox.style.borderRadius = '20px';
+        powerBox.style.boxShadow = `0 0 10px ${textColor}`;
+        powerBox.style.maxWidth = '100%'; // Penting untuk mode portrait
+        powerBox.style.textAlign = 'center';
+        
+        // Kekuatan text
         const powerText = document.createElement('div');
         powerText.textContent = 'Kekuatan IceWing & SeaWing telah aktif!';
-        powerText.style.fontSize = '0.8em';
-        powerText.style.marginTop = '1rem';
-        powerText.style.padding = '0.5rem';
-        powerText.style.border = '1px solid #00fbff';
-        powerText.style.borderRadius = '20px';
-        powerText.style.boxShadow = '0 0 10px #00fbff';
+        powerText.style.color = textColor;
+        powerText.style.fontFamily = fontFamily;
+        powerText.style.fontSize = 'clamp(0.9rem, 3vw, 1.2rem)'; // Responsive font size
+        powerText.style.textShadow = `0 0 5px ${textColor}`;
         powerText.style.textAlign = 'center';
-        powerText.style.width = '100%'
+        powerText.style.boxSizing = 'border-box';
+        powerText.style.margin = '0';
+        powerBox.appendChild(powerText);
+        powerContainer.appendChild(powerBox);
         
-        overlay.appendChild(dragonEmoji);
-        overlay.appendChild(rawrText);
-        overlay.appendChild(subText);
-        overlay.appendChild(powerText);
+        // Struktur DOM dengan cara yang benar
+        contentContainer.appendChild(lawlessText);
+        contentContainer.appendChild(rawrText);
+        contentContainer.appendChild(emojiContainer);
+        contentContainer.appendChild(subText);
+        contentContainer.appendChild(powerContainer);
+        contentGrid.appendChild(contentContainer);
+        overlay.appendChild(contentGrid);
         document.body.appendChild(overlay);
         
+        // Event listener untuk perubahan orientasi
+        const handleOrientationChange = () => {
+            // Additional adjustments based on orientation
+            if (window.innerHeight > window.innerWidth) {
+                // Portrait mode adjustments
+                powerBox.style.maxWidth = '90%';
+                contentContainer.style.padding = '0 15px';
+            } else {
+                // Landscape mode adjustments
+                powerBox.style.maxWidth = '100%';
+                contentContainer.style.padding = '0 20px';
+            }
+        };
+        
+        // Call once to set initial state
+        handleOrientationChange();
+        
+        // Add event listeners
+        window.addEventListener('resize', handleOrientationChange);
+        window.addEventListener('orientationchange', handleOrientationChange);
+        
+        // Remove after delay
         setTimeout(() => {
+            // Remove event listeners
+            window.removeEventListener('resize', handleOrientationChange);
+            window.removeEventListener('orientationchange', handleOrientationChange);
+            
             overlay.style.opacity = '0';
             overlay.style.transition = 'opacity 0.8s';
             setTimeout(() => {
@@ -206,8 +281,6 @@ function activateRawrEasterEgg() {
         }, 3000);
     }
 }
-
-// Removed trivia Easter egg function
 
 // Function to activate VORE Easter egg (using the existing voreEasterEgg object)
 function activateVoreEasterEgg() {
