@@ -130,6 +130,7 @@ function activateRawrEasterEgg() {
         overlay.style.justifyContent = 'center';
         overlay.style.zIndex = '9999';
         overlay.style.color = '#00fbff';
+        overlay.style.textAlign = 'center'; // Ensure text is centered
         
         // Improved responsive font sizing for different device widths
         if (window.innerWidth <= 320) {
@@ -162,16 +163,22 @@ function activateRawrEasterEgg() {
         dragonEmoji.textContent = '🐉✨';
         dragonEmoji.style.fontSize = '1.5em';
         dragonEmoji.style.marginBottom = '0.5rem';
+        dragonEmoji.style.textAlign = 'center';
+        dragonEmoji.style.width = '100%';
         
         const rawrText = document.createElement('div');
         rawrText.textContent = 'RAWRRRRR!!!';
         rawrText.style.letterSpacing = '1px';
+        rawrText.style.textAlign = 'center';
+        rawrText.style.width = '100%';
         
         const subText = document.createElement('div');
         subText.textContent = 'Tercipta dari es abadi';
         subText.style.fontSize = '0.7em';
         subText.style.marginTop = '0.5rem';
         subText.style.opacity = '0.8';
+        subText.style.textAlign = 'center';
+        subText.style.width = '100%';
         
         const powerText = document.createElement('div');
         powerText.textContent = 'Kekuatan IceWing & SeaWing telah aktif!';
@@ -181,6 +188,8 @@ function activateRawrEasterEgg() {
         powerText.style.border = '1px solid #00fbff';
         powerText.style.borderRadius = '20px';
         powerText.style.boxShadow = '0 0 10px #00fbff';
+        powerText.style.textAlign = 'center';
+        powerText.style.width = '100%'
         
         overlay.appendChild(dragonEmoji);
         overlay.appendChild(rawrText);
